@@ -58,5 +58,8 @@
     <Library Include="zlib.lib">
       <Filter>资源文件</Filter>
     </Library>
+    <Library Include="freetype.lib">
+      <Filter>资源文件</Filter>
+    </Library>
   </ItemGroup>
 </Project>
