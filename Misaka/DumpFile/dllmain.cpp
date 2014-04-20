@@ -44,7 +44,7 @@ void memcopy(void* dest, void*src, size_t size)
 
 ///////////////收集filename, offset, size信息//////////////////////////////////////////////////////
 
-PVOID pGetName = (PVOID)0x4737AE;
+PVOID pGetName = (PVOID)0x47387E;
 __declspec(naked)void GetName()
 {
 	__asm
@@ -69,7 +69,7 @@ __declspec(naked)void GetDataOffset()
 }
 
 //zlib压缩信息，椎名里緖（Rioshiina）引擎
-PVOID pFileInfo = (PVOID)0x475426;
+PVOID pFileInfo = (PVOID)0x4754F6;
 __declspec(naked)void GetFileInfo()
 {
 	__asm
@@ -111,7 +111,7 @@ void WINAPI DumpFile()
 	}
 }
 
-PVOID pDumpFile = (PVOID)0x4736CD;
+PVOID pDumpFile = (PVOID)0x47379D;
 __declspec(naked)void _DumpFile()
 {
 	__asm
