@@ -9,7 +9,7 @@
 #define ACR_GBKFONT
 //#define ACR_DRAWTEXT
 
-
+#define ACR_SYSTEXT
 ///////////////绘制文字///////////////////////////////////////////////////////////
 
 #ifdef ACR_DRAWTEXT
@@ -56,6 +56,19 @@ int WINAPI NewCreateFontIndirectA(LOGFONTA *lplf)
 
 #endif
 
+///////////////修改少量系统文字///////////////////////////////////////////////////
+#ifdef ACR_SYSTEXT
+PVOID g_pOldSetWindowTextA = NULL;
+typedef int (WINAPI *PfuncSetWindowTextA)(HWND hwnd, LPCTSTR lpString);
+int WINAPI NewSetWindowTextA(HWND hwnd, LPCTSTR lpString)
+{
+	if (!memcmp(lpString, "\x90\xAF\x8B\xF3", 4))
+	{
+		strcpy((char*)(LPCTSTR)lpString, "架向星空之桥AA");
+	}
+	return ((PfuncSetWindowTextA)g_pOldSetWindowTextA)(hwnd, lpString);
+}
+#endif
 
 //安装Hook 
 void SetHook()
@@ -73,6 +86,14 @@ void SetHook()
 	DetourUpdateThread(GetCurrentThread());
 	g_pOldCreateFontIndirectA = DetourFindFunction("GDI32.dll", "CreateFontIndirectA");
 	DetourAttach(&g_pOldCreateFontIndirectA, NewCreateFontIndirectA);
+	DetourTransactionCommit();
+#endif
+
+#ifdef ACR_SYSTEXT
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	g_pOldSetWindowTextA = DetourFindFunction("USER32.dll", "SetWindowTextA");
+	DetourAttach(&g_pOldSetWindowTextA, NewSetWindowTextA);
 	DetourTransactionCommit();
 #endif
 }
