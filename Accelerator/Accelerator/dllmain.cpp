@@ -9,8 +9,9 @@
 #define ACR_GBKFONT
 //#define ACR_DRAWTEXT
 
-#define ACR_SYSTEXT
+//#define ACR_SYSTEXT
 ///////////////绘制文字///////////////////////////////////////////////////////////
+
 
 #ifdef ACR_DRAWTEXT
 
@@ -47,9 +48,9 @@ PVOID g_pOldCreateFontIndirectA = NULL;
 typedef int (WINAPI *PfuncCreateFontIndirectA)(LOGFONTA *lplf);
 int WINAPI NewCreateFontIndirectA(LOGFONTA *lplf)
 {
-	lplf->lfCharSet = ANSI_CHARSET;
-	//lplf->lfCharSet = GB2312_CHARSET;
-	strcpy(lplf->lfFaceName, "黑体");
+	//lplf->lfCharSet = ANSI_CHARSET;
+	lplf->lfCharSet = GB2312_CHARSET;
+	strcpy(lplf->lfFaceName, "My黑体");
 	
 	return ((PfuncCreateFontIndirectA)g_pOldCreateFontIndirectA)(lplf);
 }
