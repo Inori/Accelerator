@@ -45,7 +45,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>F:\Kan\Accelerator\Accelerator\Accelerator\Accelerator\ftsdk\include;F:\Kan\Accelerator\Accelerator\Accelerator\Accelerator\dxsdk\Include;$(IncludePath)</IncludePath>
+    <IncludePath>F:\Kan\Accelerator\Accelerator\Accelerator\ftsdk\include;F:\Kan\Accelerator\Accelerator\Accelerator\dxsdk\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -81,7 +81,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>F:\Kan\Accelerator\Accelerator\Accelerator\Accelerator\ftsdk\lib;F:\Kan\Accelerator\Accelerator\Accelerator\Accelerator\dxsdk\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>F:\Kan\Accelerator\Accelerator\Accelerator\ftsdk\lib;F:\Kan\Accelerator\Accelerator\Accelerator\dxsdk\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
