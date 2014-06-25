@@ -107,9 +107,9 @@ class GdipDrawer
 {
 public:
 	GdipDrawer();
-	GdipDrawer(string fontname, int fontsize);
+	GdipDrawer(string fontname, int font_size);
 
-	bool InitDrawer(string fontname, int fontsize);
+	bool InitDrawer(string fontname, int font_size);
 
 	void SetTextColor(TextColor color);
 
@@ -119,7 +119,7 @@ public:
 	//radius: Íâ·¢¹â°ë¾¶
 	void ApplyEffect(TextEffect effect, TextColor color, float _d_pixwidth = 2, float _radius = 0.0);
 
-	void DrawString(HDC hdc, wstring str, int xdest, int ydest, int lineHeight);
+	void DrawString(HDC hdc, wstring str, int xdest, int ydest);
 
 	~GdipDrawer();
 
@@ -129,6 +129,8 @@ private:
 
 	FreeType ft;
 	charBitmap cbmp;
+
+	int fontsize;
 
 	bool has_color;
 	bool has_glow;

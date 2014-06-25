@@ -11,9 +11,19 @@ void SetNopCode(BYTE* pnop, size_t size)
 	}
 }
 
-void memcopy(void* dest, void*src, size_t size)
+void MemCopy(void* dest, void*src, size_t size)
 {
 	DWORD oldProtect;
 	VirtualProtect(dest, size, PAGE_EXECUTE_READWRITE, &oldProtect);
 	memcpy(dest, src, size);
+}
+
+
+wchar_t *AnsiToUnicode(const char *str)
+{
+	static wchar_t result[1024];
+	int len = MultiByteToWideChar(CP_ACP, 0, str, -1, NULL, 0);
+	MultiByteToWideChar(CP_ACP, 0, str, -1, result, len);
+	result[len] = L'\0';
+	return result;
 }

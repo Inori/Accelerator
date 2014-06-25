@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "ftdrawtext.h"
+#include "drawtext.h"
 
 
 ////////////////////////////////FreeType/////////////////////////////////////////
@@ -100,22 +99,7 @@ FreeType::~FreeType()
 //所需内存在外部申请，外部释放
 void Cvt8BitTo32Bit(BYTE* dst, BYTE*src, DWORD nWidth, DWORD nHeight)
 {
-	/*
-	for (int y = 0; y < nHeight; y++)
-	{
-	BYTE *srcline = &src[y * nWidth];
-	//BYTE *srcline = &src[(nHeight - y - 1)*nWidth];
-	BYTE *dstline = &dst[y * nWidth * pix_size];
-	for (int x = 0; x < nWidth; x++)
-	{
-	BYTE pix = srcline[x];
-	dstline[x*pix_size] = (int)(pix + ((color.r - pix)* 255.0f) / 255.0f);
-	dstline[x*pix_size + 1] = (int)(pix + ((color.g - pix)* 255.0f) / 255.0f);
-	dstline[x*pix_size + 2] = (int)(pix + ((color.b - pix)* 255.0f) / 255.0f);
-	dstline[x*pix_size + 3] = (pix == 255) ? color.a : pix;
-	}
-	}
-	*/
+
 	//四通道
 	static const int pix_size = 4;
 
@@ -144,21 +128,24 @@ GdipDrawer::GdipDrawer()
 {
 }
 
-GdipDrawer::GdipDrawer(string fontname, int fontsize)
+GdipDrawer::GdipDrawer(string fontname, int font_size)
 {
-	InitDrawer( fontname, fontsize);
+	InitDrawer( fontname, font_size);
+	
 }
 
-bool GdipDrawer::InitDrawer(string fontname, int fontsize)
+bool GdipDrawer::InitDrawer(string fontname, int font_size)
 {
 
 	// 初始化 GDI+
 	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
 	// 初始化FreeType
-	if (!ft.SetFont(fontname, fontsize))
+	if (!ft.SetFont(fontname, font_size))
 		return false;
-	
+
+	fontsize = font_size;
+
 	has_color = false;
 	has_glow = false;
 	has_shadow = false;
@@ -216,7 +203,8 @@ void GdipDrawer::ApplyEffect(TextEffect effect, TextColor color, float _d_pixwid
 
 //这里的lineHeight应该也可以自己算出来而不是指定，有待完善
 //lineHeight：单行文字高度
-void  GdipDrawer::DrawString(HDC hdc, wstring str, int xdest, int ydest, int lineHeight)
+//void  GdipDrawer::DrawString(HDC hdc, wstring str, int xdest, int ydest, int lineHeight)
+void  GdipDrawer::DrawString(HDC hdc, wstring str, int xdest, int ydest)
 {
 	//绘制起点
 	int pen_x = xdest;
@@ -228,7 +216,7 @@ void  GdipDrawer::DrawString(HDC hdc, wstring str, int xdest, int ydest, int lin
 		//换行
 		if (wc == L'\n')
 		{
-			pen_y += lineHeight;
+			pen_y += fontsize;
 			pen_x = xdest;
 			continue;
 		}
@@ -255,7 +243,7 @@ void  GdipDrawer::DrawString(HDC hdc, wstring str, int xdest, int ydest, int lin
 			ImageAttributes iAtt;
 			iAtt.SetColorMatrix(&effect_colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
 			graphics.DrawImage(&bitmap,
-				Rect(pen_x + d_pixwidth, lineHeight - cbmp.bearingY + pen_y + d_pixwidth, nWidth + d_pixwidth, nHeight + d_pixwidth),
+				Rect(pen_x + d_pixwidth, fontsize - cbmp.bearingY + pen_y + d_pixwidth, nWidth + d_pixwidth, nHeight + d_pixwidth),
 				0, 0, nWidth, nHeight,
 				UnitPixel, &iAtt);
 		}
@@ -264,7 +252,7 @@ void  GdipDrawer::DrawString(HDC hdc, wstring str, int xdest, int ydest, int lin
 			ImageAttributes iAtt;
 			iAtt.SetColorMatrix(&effect_colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
 
-			Matrix myMatrix(1.3f, 0.0f, 0.0f, 1.3f, pen_x, lineHeight - cbmp.bearingY + pen_y);
+			Matrix myMatrix(1.3f, 0.0f, 0.0f, 1.3f, pen_x, fontsize - cbmp.bearingY + pen_y);
 			RectF srcRect(0.0f, 0.0f, nWidth, nHeight);
 
 			BlurParams myBlurParams;
@@ -286,7 +274,7 @@ void  GdipDrawer::DrawString(HDC hdc, wstring str, int xdest, int ydest, int lin
 			ImageAttributes imageAtt;
 			imageAtt.SetColorMatrix(&text_colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
 			graphics.DrawImage(&bitmap, 
-				Rect(pen_x + dpixwidth, lineHeight - cbmp.bearingY + pen_y + dpixwidth, nWidth, nHeight),
+				Rect(pen_x + dpixwidth, fontsize - cbmp.bearingY + pen_y + dpixwidth, nWidth, nHeight),
 				0, 0, nWidth, nHeight, 
 				UnitPixel, &imageAtt);
 		}
@@ -294,7 +282,7 @@ void  GdipDrawer::DrawString(HDC hdc, wstring str, int xdest, int ydest, int lin
 		{
 			CachedBitmap  cBitmap(&bitmap, &graphics);
 			//绘制CachedBitmap更快
-			graphics.DrawCachedBitmap(&cBitmap, pen_x + dpixwidth, lineHeight - cbmp.bearingY + pen_y + dpixwidth);
+			graphics.DrawCachedBitmap(&cBitmap, pen_x + dpixwidth, fontsize - cbmp.bearingY + pen_y + dpixwidth);
 		}
 		
 
