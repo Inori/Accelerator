@@ -11,7 +11,7 @@ uint BKDRHash(const uchar *str, const uint len)
 	for (uint i = 0; i < len; i++)
 	{
 		if (str[i] != 0)
-			hash = hash * seed + (*str++);
+			hash = hash * seed + str[i];
 	}
 
 	return (hash & 0x7FFFFFFF);
@@ -170,6 +170,7 @@ acr_index *ScriptParser::Parse()
 		index_list[i].old_str_len = real_index->old_str_len;
 		index_list[i].new_str_off = (real_index->new_str_off + (DWORD)data);
 		index_list[i].new_str_len = real_index->new_str_len;
+		real_index++;
 	}
 	return index_list;
 }
@@ -179,18 +180,13 @@ DWORD ScriptParser::GetStrCount()
 	return str_count;
 }
 
-void ScriptParser::Over()
+ScriptParser::~ScriptParser()
 {
 	if (is_compressed)
 		delete[] real_data;
 
 	delete[]data;
 	delete[]index_list;
-}
-
-ScriptParser::~ScriptParser()
-{
-	Over();
 	CloseHandle(hfile);
 }
 
@@ -211,11 +207,14 @@ bool StringInjector::Init(string fname)
 		MessageBoxA(NULL, "parser init failed!", "Error", MB_OK);
 		return false;
 	}
+
+	inittranslator();
+	/*
 	if (!log.Init("log.txt"))
 	{
 		MessageBoxA(NULL, "logfile init failed!", "Error", MB_OK);
 		return false;
-	}
+	}*/
 }
 
 vector<HashString> StringInjector::gethashstrlist()
@@ -258,8 +257,13 @@ void StringInjector::Inject(void *dst, ulong dstlen)
 	memstr newstr = translator.Translate(oldstr);
 
 	//如果匹配，则新字符串拷贝到原位置，否则不操作
+	static wchar_t *zero = L"\0";
 	if (newstr.str != NULL)
+	{
 		memcopy(dst, newstr.str, newstr.strlen);
+		memcopy((void*)((uchar*)dst + newstr.strlen), zero, newstr.strlen); // 补 L"\0"
+	}
+		
 }
 
 

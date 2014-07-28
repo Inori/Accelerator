@@ -107,7 +107,6 @@ public:
 	bool Init(string fname);
 	acr_index *Parse();
 	DWORD GetStrCount();
-	void Over();
 
 	~ScriptParser();
 private:
@@ -144,7 +143,7 @@ private:
 
 	Translator translator;
 	ScriptParser parser;
-	LogFile log;
+	//LogFile log;
 };
 
 

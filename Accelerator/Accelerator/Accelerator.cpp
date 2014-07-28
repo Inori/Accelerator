@@ -110,9 +110,20 @@ __declspec(naked) void __stdcall ft_textout_black()
 
 void __stdcall copy_string(DWORD offset)
 {
-	DWORD oldlen = wstrlen((wchar_t*)offset);
+	//MessageBoxW(NULL, (wchar_t*)offset, L"Error", MB_OK);
+	static bool isCopyed = false;
 
-	injector.Inject((void*)offset, oldlen);
+	if (*((WORD*)offset) != 0xFF0F)
+	{
+		//if (!isCopyed)
+		//{
+			DWORD oldlen = wstrlen((wchar_t*)offset);
+			//MessageBoxW(NULL, (wchar_t*)offset, L"Error", MB_OK);
+			injector.Inject((void*)offset, oldlen);
+			isCopyed = true;
+		//}
+	}
+
 }
 
 PVOID phookaddr = (PVOID)0x49A48F;
@@ -187,7 +198,7 @@ void InitProc()
 #endif
 
 #ifdef ACR_TRANSLATE
-	injector.Init("");
+	injector.Init("Platonic16.acr");
 
 #endif
 	SetHook();
