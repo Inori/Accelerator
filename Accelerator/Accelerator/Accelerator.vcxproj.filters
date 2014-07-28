@@ -36,6 +36,9 @@
     <ClInclude Include="drawtext.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="stringmap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="detours.lib">
@@ -56,6 +59,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="drawtext.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stringmap.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -4,10 +4,13 @@
 ///////////////////功能设置：用来定义本次编译需要完成的功能///////////////////////
 
 //中文字符集
-#define ACR_GBKFONT
+//#define ACR_GBKFONT
 
 //绘制字体
-#define ACR_DRAWTEXT
+//#define ACR_DRAWTEXT
+
+//动态汉化
+#define ACR_TRANSLATE
 
 
 //包括以下在内的其他功能：
@@ -16,7 +19,16 @@
 
 ////////////全局变量////////////////////////////////////////////////////////
 
+#ifdef ACR_DRAWTEXT
+
 GdipDrawer gdrawer;
+#endif
+
+#ifdef ACR_TRANSLATE
+
+StringInjector injector;
+
+#endif
 
 
 
@@ -93,9 +105,33 @@ __declspec(naked) void __stdcall ft_textout_black()
 
 #endif
 
+///////////////替换字符串/////////////////////////////////////////////////
+#ifdef ACR_TRANSLATE
+
+void __stdcall copy_string(DWORD offset)
+{
+	DWORD oldlen = wstrlen((wchar_t*)offset);
+
+	injector.Inject((void*)offset, oldlen);
+}
+
+PVOID phookaddr = (PVOID)0x49A48F;
+__declspec(naked)void inject_string()
+{
+	__asm
+	{
+		pushad
+		push ecx
+		call copy_string
+		popad
+		jmp phookaddr
+	}
+}
+
+#endif
 
 
-
+//////////////////////////////////////////////////////////////////////////
 //安装Hook 
 void SetHook()
 {
@@ -119,6 +155,14 @@ void SetHook()
 #endif
 
 
+#ifdef ACR_TRANSLATE
+	DetourTransactionBegin();
+	DetourAttach(&phookaddr, inject_string);
+	DetourTransactionCommit();
+
+#endif
+
+
 #ifdef ACR_EXTRA
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
@@ -130,7 +174,8 @@ void SetHook()
 
 void InitProc()
 {
-	TextColor color(255, 255, 0, 255);
+#ifdef ACR_DRAWTEXT
+	TextColor color(251, 238, 245, 255);
 	//TextColor effcl(0, 0, 0, 255);
 
 	gdrawer.InitDrawer("simhei.ttf",89);
@@ -139,8 +184,12 @@ void InitProc()
 
 	SetNopCode((BYTE*)g_p_textout_white, 6);
 	SetNopCode((BYTE*)g_p_textout_black, 6);
+#endif
 
+#ifdef ACR_TRANSLATE
+	injector.Init("");
 
+#endif
 	SetHook();
 }
 

@@ -82,6 +82,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>F:\Kan\Accelerator\Accelerator\Accelerator\ftsdk\lib;F:\Kan\Accelerator\Accelerator\Accelerator\dxsdk\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -89,6 +91,7 @@
     <ClInclude Include="detours.h" />
     <ClInclude Include="detver.h" />
     <ClInclude Include="drawtext.h" />
+    <ClInclude Include="stringmap.h" />
     <ClInclude Include="tools.h" />
     <ClInclude Include="zconf.h" />
     <ClInclude Include="zlib.h" />
@@ -101,6 +104,7 @@
   <ItemGroup>
     <ClCompile Include="Accelerator.cpp" />
     <ClCompile Include="drawtext.cpp" />
+    <ClCompile Include="stringmap.cpp" />
     <ClCompile Include="tools.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

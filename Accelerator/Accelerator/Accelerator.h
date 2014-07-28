@@ -9,13 +9,12 @@
 #define ACCELERATOR_H
 
 #include <Windows.h>
-#include <string>
-
-using namespace std;
-
 
 #include "detours.h"
 #include "drawtext.h"
 #include "tools.h"
+#include "stringmap.h"
+
+
 
 #endif

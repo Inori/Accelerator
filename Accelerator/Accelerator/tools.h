@@ -13,7 +13,9 @@
 
 void SetNopCode(BYTE* pnop, size_t size);
 
-void MemCopy(void* dest, void*src, size_t size);
+void memcopy(void* dest, void*src, size_t size);
+
+DWORD wstrlen(wchar_t *ws);
 
 wchar_t *AnsiToUnicode(const char *str);
 

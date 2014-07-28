@@ -11,13 +11,17 @@ void SetNopCode(BYTE* pnop, size_t size)
 	}
 }
 
-void MemCopy(void* dest, void*src, size_t size)
+void memcopy(void* dest, void*src, size_t size)
 {
 	DWORD oldProtect;
 	VirtualProtect(dest, size, PAGE_EXECUTE_READWRITE, &oldProtect);
 	memcpy(dest, src, size);
 }
 
+DWORD wstrlen(wchar_t *ws)
+{
+	return 2 * wcslen(ws);
+}
 
 wchar_t *AnsiToUnicode(const char *str)
 {
