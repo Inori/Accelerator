@@ -108,36 +108,46 @@ __declspec(naked) void __stdcall ft_textout_black()
 ///////////////替换字符串/////////////////////////////////////////////////
 #ifdef ACR_TRANSLATE
 
-void __stdcall copy_string(DWORD offset)
-{
-	//MessageBoxW(NULL, (wchar_t*)offset, L"Error", MB_OK);
-	static bool isCopyed = false;
+//00480256 | .  53            push    ebx
+//00480257 | .  8BCF          mov     ecx, edi
+//00480259 | .  897C24 14     mov     dword ptr[esp + 0x14], edi
+//0048025D      FF52 10       call    dword ptr[edx + 0x10];  get_glyph. dword ptr[edx + 0x10] = 004B21F0
 
-	if (*((WORD*)offset) != 0xFF0F)
+//004B21F0   $  55            push    ebp
+
+typedef ulong (__stdcall *get_glyph_func_fn)(wchar_t *wstr);
+get_glyph_func_fn get_glyph_func = (get_glyph_func_fn)0x4B21F0;
+
+#define CACHE_LEN 512
+uchar viewstr[CACHE_LEN];
+void __stdcall modify_text(wchar_t *wstr)
+{
+	__asm pushad //保护现场，非常重要！
+
+	if (wstr != NULL)
 	{
-		//if (!isCopyed)
-		//{
-			DWORD oldlen = wstrlen((wchar_t*)offset);
-			//MessageBoxW(NULL, (wchar_t*)offset, L"Error", MB_OK);
-			injector.Inject((void*)offset, oldlen);
-			isCopyed = true;
-		//}
+		ulong oldlen = wstrlen(wstr);
+		memstr newstr = injector.MatchString((void*)wstr, oldlen);
+		if (newstr.str != NULL) //如果匹配,复制新字符串
+		{
+			memcpy(viewstr, newstr.str, newstr.strlen);
+			memset(&viewstr[newstr.strlen], 0, 2);
+		}
+		else //如果不匹配，复制原来的字符串
+		{
+			memcpy(viewstr, wstr, oldlen);
+			memset(&viewstr[oldlen], 0, 2);
+		}
+	}
+	else
+	{
+		memset(viewstr, 0, CACHE_LEN); //清空内存，否则会出现大量重复显示
 	}
 
+	__asm popad //恢复现场
+	get_glyph_func((wchar_t*)viewstr);
 }
 
-PVOID phookaddr = (PVOID)0x49A48F;
-__declspec(naked)void inject_string()
-{
-	__asm
-	{
-		pushad
-		push ecx
-		call copy_string
-		popad
-		jmp phookaddr
-	}
-}
 
 #endif
 
@@ -168,9 +178,8 @@ void SetHook()
 
 #ifdef ACR_TRANSLATE
 	DetourTransactionBegin();
-	DetourAttach(&phookaddr, inject_string);
+	DetourAttach((void**)&get_glyph_func, modify_text);
 	DetourTransactionCommit();
-
 #endif
 
 
@@ -198,7 +207,9 @@ void InitProc()
 #endif
 
 #ifdef ACR_TRANSLATE
+
 	injector.Init("Platonic16.acr");
+
 
 #endif
 	SetHook();

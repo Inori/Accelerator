@@ -22,31 +22,19 @@ YukaScript
 EntisGLS
 
 
-提取单字的一行，ecx为字符串地址，从这里hook
+断点GDI32.GetGlyphOutlineW，找到其调用者，此函数只有一个参数压栈，如果非空则为字符串。
+注意如果是空需要清空字符串缓存。
 
-0049A47B   . /74 50         je      short 0049A4CD
-0049A47D   . |8B4F 20       mov     ecx, dword ptr [edi+0x20]
-0049A480   . |3BCB          cmp     ecx, ebx
-0049A482   . |74 11         je      short 0049A495
-0049A484   . |8B5424 18     mov     edx, dword ptr [esp+0x18]
-0049A488   . |8B77 24       mov     esi, dword ptr [edi+0x24]
-0049A48B   . |3BD6          cmp     edx, esi
-0049A48D   . |73 06         jnb     short 0049A495
-0049A48F   . |66:8B0C51     mov     cx, word ptr [ecx+edx*2]                    ;  提取单字
-0049A493   . |EB 02         jmp     short 0049A497
-0049A495   > |33C9          xor     ecx, ecx
-0049A497   > |81E1 FFFF0000 and     ecx, 0xFFFF
-0049A49D   . |50            push    eax
-0049A49E   . |8948 1C       mov     dword ptr [eax+0x1C], ecx
-0049A4A1   . |8BCD          mov     ecx, ebp
-0049A4A3   . |8958 08       mov     dword ptr [eax+0x8], ebx
-0049A4A6   . |8958 0C       mov     dword ptr [eax+0xC], ebx
-0049A4A9   . |8958 10       mov     dword ptr [eax+0x10], ebx
-0049A4AC   . |8958 14       mov     dword ptr [eax+0x14], ebx
-0049A4AF   . |8958 18       mov     dword ptr [eax+0x18], ebx
-0049A4B2   . |C700 A09D5200 mov     dword ptr [eax], 00529DA0                   ;  ASCII "pBA"
-0049A4B8   . |C740 04 04000>mov     dword ptr [eax+0x4], 0x4
-0049A4BF   . |E8 7CEEF7FF   call    00419340                                    ;  传递某种结构体，获取字形相关信息
+
+004B2410  |.  FF56 50       |call    dword ptr [esi+0x50]                ;  GDI32.GetGlyphOutlineW
+
+调用者：
+00480256 | .  53            push    ebx
+00480257 | .  8BCF          mov     ecx, edi
+00480259 | .  897C24 14     mov     dword ptr[esp + 0x14], edi
+0048025D      FF52 10       call    dword ptr[edx + 0x10];  get_glyph. dword ptr[edx + 0x10] = 004B21F0
+
+
 
 /*******************************************************/
 

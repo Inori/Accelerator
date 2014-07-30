@@ -2,13 +2,13 @@
 #include "tools.h"
 #include "zlib.h"
 
-uint BKDRHash(const uchar *str, const uint len)
+inline uint BKDRHash(const uchar *str, const size_t len)
 {
-	register uint hash = 0;
-	const uint seed = 131; // 31 131 1313 13131 131313 etc..
+	register size_t hash = 0; //使用size_t而不是uint避免累乘时越界
+	const size_t seed = 131; // 31 131 1313 13131 131313 etc..
 
 	if (str == NULL) return 0;
-	for (uint i = 0; i < len; i++)
+	for (size_t i = 0; i < len; i++)
 	{
 		if (str[i] != 0)
 			hash = hash * seed + str[i];
@@ -209,12 +209,6 @@ bool StringInjector::Init(string fname)
 	}
 
 	inittranslator();
-	/*
-	if (!log.Init("log.txt"))
-	{
-		MessageBoxA(NULL, "logfile init failed!", "Error", MB_OK);
-		return false;
-	}*/
 }
 
 vector<HashString> StringInjector::gethashstrlist()
@@ -246,8 +240,9 @@ void StringInjector::inittranslator()
 }
 
 
-void StringInjector::Inject(void *dst, ulong dstlen)
+bool StringInjector::Inject(void *dst, ulong dstlen)
 {
+	bool matched = false;
 	//从原来位置的字符串构造memstr
 	memstr oldstr;
 	oldstr.str = (uchar*)dst;
@@ -257,17 +252,32 @@ void StringInjector::Inject(void *dst, ulong dstlen)
 	memstr newstr = translator.Translate(oldstr);
 
 	//如果匹配，则新字符串拷贝到原位置，否则不操作
-	static wchar_t *zero = L"\0";
+	static uchar zero[2] = {0};
+	
 	if (newstr.str != NULL)
 	{
 		memcopy(dst, newstr.str, newstr.strlen);
-		memcopy((void*)((uchar*)dst + newstr.strlen), zero, newstr.strlen); // 补 L"\0"
+		memcopy((void*)((uchar*)dst + newstr.strlen), zero, 2); // 补 "\0"
+		matched = true;
 	}
-		
+
+	return matched;
 }
 
+memstr StringInjector::MatchString(void *dst, ulong dstlen)
+{
+	//从原来位置的字符串构造memstr
+	memstr oldstr;
+	oldstr.str = (uchar*)dst;
+	oldstr.strlen = dstlen;
+
+	//翻译
+	memstr newstr = translator.Translate(oldstr);
+
+	return newstr;
+}
 
 StringInjector::~StringInjector()
 {
-	//parser.Over();
+	
 }
