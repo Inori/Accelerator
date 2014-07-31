@@ -13,12 +13,11 @@
 #include <string>
 #include <unordered_map>
 
+#include "types.h"
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef unsigned char uchar;
-typedef unsigned int uint;
-typedef unsigned long ulong;
+
 
 //¶¨ÒåÄÚ´æ×Ö·û´®£¬ÒÔ¼æÈÝ¶à×Ö½ÚºÍ¿í×Ö·û×Ö·û´®
 typedef struct _memstr
@@ -35,7 +34,7 @@ typedef struct _HashString
 }HashString;
 
 //BKDR hash function
-uint BKDRHash(const uchar *str, const uint len);
+inline uint BKDRHash(const uchar *str, const uint len);
 
 typedef unordered_map<uint, memstr> StringMap;
 
@@ -61,15 +60,16 @@ class LogFile
 {
 public:
 	LogFile();
-	LogFile(string filename);
+	LogFile(string filename, uint open_mode);
 
-	bool Init(string filename);
-	void AddLog(string logstr);
+	bool Init(string filename, uint open_mode);
+	void AddLog(wstring logstr);
+	void AddLog(string logstr, uint code_page);
 
 	~LogFile();
 
 private:
-	FILE *hfile;
+	HANDLE hfile;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,6 +104,7 @@ class ScriptParser
 public:
 	ScriptParser();
 	ScriptParser(string fname);
+
 	bool Init(string fname);
 	acr_index *Parse();
 	DWORD GetStrCount();
@@ -124,7 +125,6 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//const char* logfilename = "log.txt";
 
 class StringInjector
 {
@@ -145,7 +145,6 @@ private:
 
 	Translator translator;
 	ScriptParser parser;
-	//LogFile log;
 };
 
 

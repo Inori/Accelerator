@@ -77,28 +77,48 @@ LogFile::LogFile()
 {
 }
 
-LogFile::LogFile(string filename)
+LogFile::LogFile(string filename, uint open_mode)
 {
-	if (!Init(filename))
+	if (!Init(filename, open_mode))
 		MessageBoxA(NULL, "Can not create log file!", "Error", MB_OK);
 }
 
-bool LogFile::Init(string filename)
+bool LogFile::Init(string filename, uint open_mode)
 {
-	hfile = fopen(filename.c_str(), "rb+");
-	if (!hfile)
+	hfile = CreateFileA(filename.c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, open_mode, FILE_ATTRIBUTE_ARCHIVE, NULL);
+	if (hfile == INVALID_HANDLE_VALUE)
+	{
+		MessageBoxA(NULL, "create log file error!", "Error", MB_OK);
 		return false;
+	}
+
+	//дutf16 BOM
+	ulong writtenlen = 0;
+	char *UTF16BOM = "\xFF\xFE";
+	WriteFile(hfile, UTF16BOM, 2, &writtenlen, NULL);
+
 	return true;
 }
 
-void LogFile::AddLog(string logstr)
+void LogFile::AddLog(wstring logstr)
 {
-	fprintf(hfile, "%s\r\n", logstr.c_str());
+	wstring line = logstr + L"\r\n";
+	ulong writtenlen = 0;
+	WriteFile(hfile, line.c_str(), 2*line.size(), &writtenlen, NULL);
 }
+
+void LogFile::AddLog(string logstr, uint code_page)
+{
+	string line = logstr + "\r\n";
+	wstring wline = AnsiToUnicode(line.c_str(), code_page);
+	ulong writtenlen = 0;
+	WriteFile(hfile, wline.c_str(), 2 * wline.size(), &writtenlen, NULL);
+}
+
 
 LogFile::~LogFile()
 {
-	fclose(hfile);
+	CloseHandle(hfile);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

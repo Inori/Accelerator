@@ -43,20 +43,54 @@ def byte2int(byte):
 def int2byte(num):
     return struct.pack('L',num)
 
+def fixjpstr(string):
+    newstr = string.replace('／', '')
+    return newstr
+
+def fixcnstr(string):
+    newstr = string.replace('／', '\n')
+    return newstr
+
 #将txt转换成文本列表,重写此函数可以适应于不同格式的文本
 def makestr(lines):
     oldstr_list = []
     newstr_list = []
     for index,line in enumerate(lines):
-        if re.match('\[JP[0-9]+\]', line):
+        part = re.match('<.+>(.*)\=(.*)\n', line)
+        if part:
+            oldstr = part.group(1)[:-1]
+            newstr = part.group(2)
+            oldstr_list.append(fixjpstr(oldstr))
+            newstr_list.append(fixcnstr(newstr))
+        elif line != '\n':
+            print(line)
+
+    return oldstr_list, newstr_list
+'''
+def makestr(lines):
+    oldstr_list = []
+    newstr_list = []
+    for index,line in enumerate(lines):
+        if re.match('\[JP[0-9]+\] \[.+\]', line):
+            part = re.match('\[JP[0-9]+\] \[.+\]', line).group()
+            off = len(part)
+            oldstr_list.append(line[off+1:-1])
+            
+        elif re.match('\[JP[0-9]+\]', line) or re.match('\[JP|CHOICE[0-9]+\]', line):
             oldstr_list.append(line[10:-1])
-        elif re.match('\[EN[0-9]+\]', line):
+            
+        elif re.match('\[EN[0-9]+\] \[.+\]', line):
+            part = re.match('\[EN[0-9]+\] \[.+\]', line).group()
+            off = len(part)
+            newstr_list.append(line[off+1:-1])
+            
+        elif re.match('\[EN[0-9]+\]', line) or re.match('\[EN|CHOICE[0-9]+\]', line):
             newstr_list.append(line[10:-1])
+
         elif line != '\n':
             print(line)
     return oldstr_list, newstr_list
-
-
+'''
 def BKDRHash(bytes):
     hash = 0
     seed = 131

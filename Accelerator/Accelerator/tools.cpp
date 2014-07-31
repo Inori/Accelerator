@@ -23,11 +23,112 @@ DWORD wstrlen(wchar_t *ws)
 	return 2 * wcslen(ws);
 }
 
-wchar_t *AnsiToUnicode(const char *str)
+wchar_t *AnsiToUnicode(const char *str, uint code_page)
 {
 	static wchar_t result[1024];
-	int len = MultiByteToWideChar(CP_ACP, 0, str, -1, NULL, 0);
-	MultiByteToWideChar(CP_ACP, 0, str, -1, result, len);
+	int len = MultiByteToWideChar(code_page, 0, str, -1, NULL, 0);
+	MultiByteToWideChar(code_page, 0, str, -1, result, len);
 	result[len] = L'\0';
 	return result;
+}
+
+
+wstring addenter(wstring oldstr, uint linelen)
+{
+	wstring newstr;
+	uint len = 0;
+
+	for each (auto wc in oldstr)
+	{
+		newstr += wc;
+		len++;
+		if (wc == L'\n') len = 0;
+
+		if (len == linelen)
+		{
+			newstr += L'\n';
+			len = 0;
+		}
+	}
+
+	return newstr;
+}
+
+wstring deleteenter(wstring oldstr)
+{
+	wstring newstr;
+	for each (auto wc in oldstr)
+	{
+		if (wc != L'\n')
+			newstr += wc;
+	}
+	return newstr;
+}
+
+//只换第一次出现的oldstr
+string replace_first(string dststr, string oldstr, string newstr)
+{
+	string::size_type old_len = oldstr.length();
+	if (old_len == 0)
+		return dststr;
+
+	string::size_type off = dststr.find(oldstr);
+	if (off == string::npos)
+		return dststr;
+
+	string ret = dststr.replace(off, old_len, newstr);
+	return ret;
+}
+//全部替换
+string replace_all(string dststr, string oldstr, string newstr)
+{
+	string::size_type old_len = oldstr.length();
+	if (old_len == 0)
+		return dststr;
+
+	string ret = dststr;
+	string::size_type off;
+	while (true)
+	{
+		off = ret.find(oldstr);
+		if (off == string::npos)
+			break;
+		ret = ret.replace(off, old_len, newstr);
+	}
+
+	return ret;
+}
+
+//只换第一次出现的oldstr
+wstring replace_first(wstring dststr, wstring oldstr, wstring newstr)
+{
+	wstring::size_type old_len = oldstr.length();
+	if (old_len == 0)
+		return dststr;
+
+	wstring::size_type off = dststr.find(oldstr);
+	if (off == wstring::npos)
+		return dststr;
+
+	wstring ret = dststr.replace(off, old_len, newstr);
+	return ret;
+}
+//全部替换
+wstring replace_all(wstring dststr, wstring oldstr, wstring newstr)
+{
+	wstring::size_type old_len = oldstr.length();
+	if (old_len == 0)
+		return dststr;
+
+	wstring ret = dststr;
+	wstring::size_type off;
+	while (true)
+	{
+		off = ret.find(oldstr);
+		if (off == wstring::npos)
+			break;
+		ret = ret.replace(off, old_len, newstr);
+	}
+
+	return ret;
 }

@@ -93,6 +93,7 @@
     <ClInclude Include="drawtext.h" />
     <ClInclude Include="stringmap.h" />
     <ClInclude Include="tools.h" />
+    <ClInclude Include="types.h" />
     <ClInclude Include="zconf.h" />
     <ClInclude Include="zlib.h" />
   </ItemGroup>

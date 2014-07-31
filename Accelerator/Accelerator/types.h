@@ -2,20 +2,14 @@
 *  Copyright (C) 2014 Fuyin
 *  ALL RIGHTS RESERVED
 *  Author: Fuyin
-*  Description: 
+*  Description: 常用类型定义
 \******************************************************************************/
+#ifndef TYPES_H
+#define TYPES_H
 
-#ifndef ACCELERATOR_H
-#define ACCELERATOR_H
-
-#include <Windows.h>
-#include <regex>
-
-#include "detours.h"
-#include "drawtext.h"
-#include "tools.h"
-#include "stringmap.h"
-
-
+typedef unsigned char uchar;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+typedef unsigned long long ulonglong;
 
 #endif
