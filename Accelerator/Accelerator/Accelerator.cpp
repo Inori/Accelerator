@@ -4,18 +4,18 @@
 ///////////////////功能设置：用来定义本次编译需要完成的功能///////////////////////
 
 //中文字符集
-//#define ACR_GBKFONT
+#define ACR_GBKFONT
 
 //绘制字体
-//#define ACR_DRAWTEXT
+#define ACR_DRAWTEXT
 
 //动态汉化
-#define ACR_TRANSLATE
+//#define ACR_TRANSLATE
 
 
 //包括以下在内的其他功能：
 //1、修改窗口标题
-#define ACR_EXTRA
+//#define ACR_EXTRA
 
 ////////////全局变量////////////////////////////////////////////////////////
 
@@ -38,7 +38,7 @@ LogFile logfile;
 ////////////中文字符集////////////////////////////////////////////////////////
 #ifdef ACR_GBKFONT
 
-PVOID g_pOldCreateFontIndirectA = NULL;
+PVOID g_pOldCreateFontIndirectA = CreateFontIndirectA;
 typedef int (WINAPI *PfuncCreateFontIndirectA)(LOGFONTA *lplf);
 int WINAPI NewCreateFontIndirectA(LOGFONTA *lplf)
 {
@@ -50,6 +50,7 @@ int WINAPI NewCreateFontIndirectA(LOGFONTA *lplf)
 
 	return ((PfuncCreateFontIndirectA)g_pOldCreateFontIndirectA)(lplf);
 }
+
 
 #endif
 
@@ -126,7 +127,7 @@ HWND WINAPI NewCreateWindowExA(
 
 void WINAPI FT_TextOut(HDC hdc, int nXStart, int nYStart, LPCTSTR lpString, int strlen)
 {
-	wstring ws(AnsiToUnicode(lpString), strlen);
+	wstring ws(AnsiToUnicode(lpString, 936), strlen);
 	gdrawer.DrawString(hdc, ws, nXStart, nYStart);
 }
 
@@ -282,7 +283,6 @@ void SetHook()
 #ifdef ACR_GBKFONT
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
-	g_pOldCreateFontIndirectA = DetourFindFunction("GDI32.dll", "CreateFontIndirectA");
 	DetourAttach(&g_pOldCreateFontIndirectA, NewCreateFontIndirectA);
 	DetourTransactionCommit();
 #endif
@@ -321,7 +321,7 @@ void InitProc()
 	TextColor color(251, 238, 245, 255);
 	//TextColor effcl(0, 0, 0, 255);
 
-	gdrawer.InitDrawer("simhei.ttf",89);
+	gdrawer.InitDrawer("simhei.ttf",80);
 	gdrawer.SetTextColor(color);
 	//gdrawer.ApplyEffect(Shadow, effcl, 2, 2.0);
 

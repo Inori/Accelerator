@@ -201,7 +201,7 @@ void GdipDrawer::ApplyEffect(TextEffect effect, TextColor color, float _d_pixwid
 }
 
 
-//这里的lineHeight应该也可以自己算出来而不是指定，有待完善
+
 //lineHeight：单行文字高度
 //void  GdipDrawer::DrawString(HDC hdc, wstring str, int xdest, int ydest, int lineHeight)
 void  GdipDrawer::DrawString(HDC hdc, wstring str, int xdest, int ydest)
