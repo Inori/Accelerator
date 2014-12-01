@@ -4,13 +4,13 @@
 ///////////////////功能设置：用来定义本次编译需要完成的功能///////////////////////
 
 //中文字符集
-#define ACR_GBKFONT
+//#define ACR_GBKFONT
 
 //绘制字体
-#define ACR_DRAWTEXT
+//#define ACR_DRAWTEXT
 
 //动态汉化
-//#define ACR_TRANSLATE
+#define ACR_TRANSLATE
 
 
 //包括以下在内的其他功能：
@@ -51,6 +51,29 @@ int WINAPI NewCreateFontIndirectA(LOGFONTA *lplf)
 	return ((PfuncCreateFontIndirectA)g_pOldCreateFontIndirectA)(lplf);
 }
 
+PVOID g_pOldCreateFontIndirectW = CreateFontIndirectW;
+typedef int (WINAPI *PfuncCreateFontIndirectW)(LOGFONTW *lplf);
+int WINAPI NewCreateFontIndirectW(LOGFONTW *lplf)
+{
+	lplf->lfCharSet = ANSI_CHARSET;
+	//lplf->lfCharSet = GB2312_CHARSET;
+
+	//修改后的字体，包括音符等特殊符号
+	wcscpy(lplf->lfFaceName, L"黑体");
+
+	return ((PfuncCreateFontIndirectW)g_pOldCreateFontIndirectW)(lplf);
+}
+
+
+PVOID g_pOldMultiByteToWideChar = MultiByteToWideChar;
+typedef int (WINAPI *PfuncMultiByteToWideChar)(UINT CodePage,DWORD dwFlags,LPCSTR lpMultiByteStr,int cbMultiByte,LPWSTR lpWideCharStr,int cchWideChar);
+int WINAPI NewMultiByteToWideChar(UINT CodePage, DWORD dwFlags, LPCSTR lpMultiByteStr, int cbMultiByte, LPWSTR lpWideCharStr, int cchWideChar
+	)
+{
+	//if (CodePage == 932)
+		//CodePage = 936;
+	return ((PfuncMultiByteToWideChar)g_pOldMultiByteToWideChar)(CodePage, dwFlags, lpMultiByteStr, cbMultiByte, lpWideCharStr, cchWideChar);
+}
 
 #endif
 
@@ -159,7 +182,7 @@ __declspec(naked) void __stdcall ft_textout_black()
 ///////////////替换字符串/////////////////////////////////////////////////
 #ifdef ACR_TRANSLATE
 
-
+#if 0 //雨恋
 wstring fix_note(wstring oldstr) //修正句子中注释结构
 {
 	//regex是在运行时“编译”的，因此构造效率较低，使用static避免重复构造
@@ -259,6 +282,81 @@ __declspec(naked) void __stdcall get_text()
 	}
 
 }
+#endif
+
+//00494D20 / $  55            push    ebp;  ebx = string_offset
+void* g_p_get_offset = (void*)0x494D20;
+ulong real_offset; //字符串在文件中实际地址
+__declspec(naked) void __stdcall get_offset()
+{
+	__asm
+	{
+		pushad
+		mov real_offset, ebx
+		popad
+		jmp g_p_get_offset
+	}
+
+}
+
+
+#define CACHE_LEN 512
+uchar viewstr[CACHE_LEN];
+
+ulong __stdcall get_text()
+{
+	if (real_offset != 0)
+	{
+		memstr newstr = injector.MatchStringWithOffset(real_offset); //进行匹配
+
+		if (newstr.str != NULL) //如果匹配,复制新字符串
+		{
+			ulong newlen = newstr.strlen;
+			memcpy(viewstr, newstr.str, newlen);
+			memset(&viewstr[newlen], 0x1B, 1);
+			memset(&viewstr[newlen+1], 0x00, 1);
+
+			return (ulong)(viewstr + newlen); //0x1B的地址
+		}
+		else //如果不匹配，复制原来的字符串，并log出未匹配的句子
+		{
+			memset(viewstr, 0, CACHE_LEN); //清空内存
+			//logfile.AddLog(wstr);
+		}
+
+	}
+	else
+	{
+		memset(viewstr, 0, CACHE_LEN); //清空内存，否则会出现大量重复显示
+	}
+
+	return 0;
+}
+
+
+//00494DEF | .E8 BCDDFCFF   call    <switch M2B>;  ebx = *text
+
+void* g_p_modify_offset = (void*)0x494DEF;
+ulong str_end;
+__declspec(naked) void __stdcall modify_offset()
+{
+	__asm
+	{
+		pushad
+		call get_text
+		test eax, eax
+		jz End
+		mov str_end, eax
+		popad
+		lea ebx, dword ptr [viewstr]
+		mov ecx, str_end
+		jmp g_p_modify_offset
+End:
+		popad
+		jmp g_p_modify_offset
+	}
+
+}
 
 
 
@@ -285,16 +383,26 @@ void SetHook()
 	DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&g_pOldCreateFontIndirectA, NewCreateFontIndirectA);
 	DetourTransactionCommit();
+
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	DetourAttach(&g_pOldCreateFontIndirectW, NewCreateFontIndirectW);
+	DetourTransactionCommit();
+	
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	DetourAttach(&g_pOldMultiByteToWideChar, NewMultiByteToWideChar);
+	DetourTransactionCommit();
 #endif
 
 
 #ifdef ACR_TRANSLATE
 	DetourTransactionBegin();
-	DetourAttach((void**)&get_glyph_func, modify_text);
+	DetourAttach((void**)&g_p_modify_offset, modify_offset);
 	DetourTransactionCommit();
 
 	DetourTransactionBegin();
-	DetourAttach((void**)&g_p_get_text, get_text);
+	DetourAttach((void**)&g_p_get_offset, get_offset);
 	DetourTransactionCommit();
 #endif
 
@@ -331,8 +439,8 @@ void InitProc()
 
 #ifdef ACR_TRANSLATE
 
-	injector.Init("Platonic16.acr");
-	logfile.Init("stringlog.txt", OPEN_ALWAYS);
+	injector.Init("shukufuku.acr");
+	//logfile.Init("stringlog.txt", OPEN_ALWAYS);
 
 
 #endif

@@ -44,12 +44,13 @@ public:
 	Translator();
 	Translator(vector<HashString> hashstrlist);
 
+	memstr SearchStr(uint hash);
+
 	void InsertString(vector<HashString> hashstrlist);
 	memstr Translate(memstr str);
 
 	~Translator();
 private:
-	memstr searchstr(uint hash);
 	
 	StringMap strmap;
 };
@@ -136,6 +137,7 @@ public:
 	
 	bool Inject(void *dst, ulong dstlen);  //直接向目标地址注入匹配的字符串，注入成功返回真，否则返回假
 	memstr MatchString(void *dst, ulong dstlen);  //不进行注入，直接返回匹配的字符串供手动编写代码处理。
+	memstr MatchStringWithOffset(ulong offset);  //不进行注入，根据地址直接返回匹配的字符串供手动编写代码处理。
 
 	~StringInjector();
 

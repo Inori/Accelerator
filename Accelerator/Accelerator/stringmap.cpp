@@ -42,7 +42,7 @@ void Translator::InsertString(vector<HashString> hashstrlist)
 
 
 
-memstr Translator::searchstr(uint hash)
+memstr Translator::SearchStr(uint hash)
 {
 	memstr mstr;
 	mstr.strlen = 0;
@@ -63,7 +63,7 @@ memstr Translator::Translate(memstr str)
 {
 	//首先计算传入字符串的hash
 	uint hash = BKDRHash(str.str, str.strlen);
-	return searchstr(hash);
+	return SearchStr(hash);
 }
 
 Translator::~Translator()
@@ -293,6 +293,14 @@ memstr StringInjector::MatchString(void *dst, ulong dstlen)
 
 	//翻译
 	memstr newstr = translator.Translate(oldstr);
+
+	return newstr;
+}
+
+memstr StringInjector::MatchStringWithOffset(ulong offset)
+{
+	//翻译
+	memstr newstr = translator.SearchStr(offset);
 
 	return newstr;
 }
