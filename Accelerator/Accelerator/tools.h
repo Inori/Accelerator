@@ -29,6 +29,8 @@ DWORD wstrlen(wchar_t *ws);
 
 wchar_t *AnsiToUnicode(const char *str, uint code_page);
 
+char *UnicodeToAnsi(const wchar_t *wstr, uint code_page);
+
 string replace_first(string dststr, string oldstr, string newstr);
 
 //È«²¿Ìæ»»

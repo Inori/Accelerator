@@ -441,7 +441,8 @@ void InitProc()
 
 #ifdef ACR_TRANSLATE
 
-	parser = new AcrParser("shukufuku.acr");
+	//parser = new AcrParser("shukufuku.acr");
+	parser = new TextParser("Shukufuku.txt");
 	translator = new Translator(*parser);
 	engine.Init(*translator);
 	//logfile.Init("stringlog.txt", OPEN_ALWAYS);

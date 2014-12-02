@@ -1,9 +1,11 @@
 #ifndef SCRIPTPARSER_H
 #define SCRIPTPARSER_H
 #include <string>
+#include <vector>
 #include "types.h"
 
 using std::string;
+using std::vector;
 
 typedef void *HANDLE;
 
@@ -71,7 +73,6 @@ public:
 	TextParser(string fname);
 	TextParser(const TextParser& orig);
 
-	bool Init(string fname);
 	acr_index *Parse();
 	ulong GetStrCount();
 
@@ -81,7 +82,7 @@ private:
 	FILE *fin;
 	ulong file_size;
 
-	acr_index* index; //索引数据
+	vector<acr_index> index; //索引数据
 	byte *real_data;  //字符串数据
 
 };

@@ -32,6 +32,15 @@ wchar_t *AnsiToUnicode(const char *str, uint code_page)
 	return result;
 }
 
+char *UnicodeToAnsi(const wchar_t *wstr, uint code_page)
+{
+	static char result[1024];
+	int len = WideCharToMultiByte(code_page, 0, wstr, -1, NULL, 0, NULL, 0);
+	WideCharToMultiByte(code_page, 0, wstr, -1, result, len, NULL, 0);
+	result[len] = '\0';
+	return result;
+}
+
 
 wstring addenter(wstring oldstr, uint linelen)
 {

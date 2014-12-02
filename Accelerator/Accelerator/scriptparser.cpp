@@ -1,9 +1,9 @@
-
 #include <Windows.h>
-
 #include <new>
+
 #include "zlib.h"
 #include "scriptparser.h"
+#include "tools.h"
 
 
 
@@ -146,13 +146,58 @@ TextParser::TextParser(string fname)
 	file_size = ftell(fin);
 	fseek(fin, 0, SEEK_SET);
 
+	real_data = new byte[file_size]; //分配足够的内存装载字符串
+
 }
 
-TextParser::TextParser(const TextParser& orig)
+TextParser::TextParser(const TextParser& orig):
+fin(orig.fin),
+file_size(orig.file_size),
+index(orig.index)
 {
+	real_data = new byte[file_size];
+	memcpy(real_data, orig.real_data, orig.file_size);
+}
 
+acr_index* TextParser::Parse()
+{
+	fseek(fin, 2, SEEK_SET); //pass BOM
+
+	ulong offset;
+	ulong num;
+	char *str;
+	static wchar_t text[512] = {0};
+
+	acr_index cur;
+	ulong pos = 0;
+	//重写此处以适应不同格式文本
+	while (fwscanf(fin, L"○%08X○%08d●\r\n%s\r\n\r\n", &offset, &num, text) == 3)
+	{
+		str = UnicodeToAnsi(text, 936);
+		int len = strlen(str);
+
+		memcpy(real_data + pos, str, len);
+		memset(real_data + pos + len, 0x1B, 1); //其他游戏需要根据情况适当修改
+
+		cur.hash = offset;
+		cur.new_str_len = len;
+		cur.new_str_off = (ulong)real_data + pos;
+		cur.old_str_len = len; //这两个暂时先这样
+		cur.old_str_off = (ulong)real_data + pos; //这两个暂时先这样
+
+		index.push_back(cur);
+		pos += (len+1);
+	}
+
+	return (acr_index*)&index[0];
+}
+
+ulong TextParser::GetStrCount()
+{
+	return index.size();
 }
 
 TextParser::~TextParser()
 {
+	delete[] real_data;
 }
