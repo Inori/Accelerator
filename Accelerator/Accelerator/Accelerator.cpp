@@ -449,11 +449,6 @@ void InitProc()
 
 #endif
 	SetHook();
-
-	FILE * txt = fopen("note2.txt", "wb");
-	if (!txt)
-		MessageBox(NULL, "ERROR", "open failed!", MB_OK);
-
 }
 
 void UnInst()
