@@ -91,7 +91,8 @@
     <ClInclude Include="detours.h" />
     <ClInclude Include="detver.h" />
     <ClInclude Include="drawtext.h" />
-    <ClInclude Include="stringmap.h" />
+    <ClInclude Include="scriptparser.h" />
+    <ClInclude Include="translate.h" />
     <ClInclude Include="tools.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="zconf.h" />
@@ -105,7 +106,8 @@
   <ItemGroup>
     <ClCompile Include="Accelerator.cpp" />
     <ClCompile Include="drawtext.cpp" />
-    <ClCompile Include="stringmap.cpp" />
+    <ClCompile Include="scriptparser.cpp" />
+    <ClCompile Include="translate.cpp" />
     <ClCompile Include="tools.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

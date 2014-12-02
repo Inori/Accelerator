@@ -36,10 +36,13 @@
     <ClInclude Include="drawtext.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="stringmap.h">
+    <ClInclude Include="types.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="types.h">
+    <ClInclude Include="scriptparser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="translate.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -64,7 +67,10 @@
     <ClCompile Include="drawtext.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="stringmap.cpp">
+    <ClCompile Include="scriptparser.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="translate.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

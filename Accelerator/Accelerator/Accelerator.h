@@ -14,8 +14,8 @@
 #include "detours.h"
 #include "drawtext.h"
 #include "tools.h"
-#include "stringmap.h"
-
+#include "translate.h"
+#include "scriptparser.h"
 
 
 #endif

@@ -1,5 +1,5 @@
 #include "Accelerator.h"
-
+#include "stdio.h"
 
 ///////////////////功能设置：用来定义本次编译需要完成的功能///////////////////////
 
@@ -26,7 +26,9 @@ GdipDrawer gdrawer;
 
 #ifdef ACR_TRANSLATE
 
-StringInjector injector;
+ScriptParser *parser;
+Translator *translator;
+TranslateEngine engine;
 LogFile logfile;
 
 #endif
@@ -182,7 +184,7 @@ __declspec(naked) void __stdcall ft_textout_black()
 ///////////////替换字符串/////////////////////////////////////////////////
 #ifdef ACR_TRANSLATE
 
-#if 0 //雨恋
+#if 0 //夏之雨
 wstring fix_note(wstring oldstr) //修正句子中注释结构
 {
 	//regex是在运行时“编译”的，因此构造效率较低，使用static避免重复构造
@@ -307,7 +309,7 @@ ulong __stdcall get_text()
 {
 	if (real_offset != 0)
 	{
-		memstr newstr = injector.MatchStringWithOffset(real_offset); //进行匹配
+		memstr newstr = engine.MatchStringByOffset(real_offset); //进行匹配
 
 		if (newstr.str != NULL) //如果匹配,复制新字符串
 		{
@@ -439,12 +441,24 @@ void InitProc()
 
 #ifdef ACR_TRANSLATE
 
-	injector.Init("shukufuku.acr");
+	parser = new AcrParser("shukufuku.acr");
+	translator = new Translator(*parser);
+	engine.Init(*translator);
 	//logfile.Init("stringlog.txt", OPEN_ALWAYS);
-
 
 #endif
 	SetHook();
+
+	FILE * txt = fopen("note2.txt", "wb");
+	if (!txt)
+		MessageBox(NULL, "ERROR", "open failed!", MB_OK);
+
+}
+
+void UnInst()
+{
+	delete parser;
+	delete translator;
 }
 
 //需要一个导出函数
@@ -464,8 +478,11 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 		InitProc();
 		break;
 	case DLL_THREAD_ATTACH:
+		break;
 	case DLL_THREAD_DETACH:
+		break;
 	case DLL_PROCESS_DETACH:
+		UnInst();
 		break;
 	}
 	return TRUE;
