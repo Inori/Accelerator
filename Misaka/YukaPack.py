@@ -61,7 +61,7 @@ def WriteFile(dst, filelist):
         orgsize = os.path.getsize(fn)
         src = open(fn, 'rb')
         data = src.read()
-        global COMPRESS
+
         if COMPRESS == 1:
             compressdata = zlib.compress(data, 9)
             size = len(compressdata)
