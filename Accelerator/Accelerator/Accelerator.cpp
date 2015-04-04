@@ -4,7 +4,7 @@
 ///////////////////功能设置：用来定义本次编译需要完成的功能///////////////////////
 
 //中文字符集
-//#define ACR_GBKFONT
+#define ACR_GBKFONT
 
 //绘制字体
 //#define ACR_DRAWTEXT
@@ -28,8 +28,8 @@ GdipDrawer gdrawer;
 
 ScriptParser *parser;
 Translator *translator;
-TranslateEngine engine;
-LogFile logfile;
+TranslateEngine *engine;
+LogFile *logfile;
 
 #endif
 
@@ -44,11 +44,12 @@ PVOID g_pOldCreateFontIndirectA = CreateFontIndirectA;
 typedef int (WINAPI *PfuncCreateFontIndirectA)(LOGFONTA *lplf);
 int WINAPI NewCreateFontIndirectA(LOGFONTA *lplf)
 {
-	lplf->lfCharSet = ANSI_CHARSET;
+	//lplf->lfCharSet = ANSI_CHARSET;
+	lplf->lfCharSet = GB2312_CHARSET;
 	//lplf->lfCharSet = GB2312_CHARSET;
 
 	//修改后的字体，包括音符等特殊符号
-	strcpy(lplf->lfFaceName, "黑体");
+	//strcpy(lplf->lfFaceName, "黑体");
 
 	return ((PfuncCreateFontIndirectA)g_pOldCreateFontIndirectA)(lplf);
 }
@@ -57,11 +58,12 @@ PVOID g_pOldCreateFontIndirectW = CreateFontIndirectW;
 typedef int (WINAPI *PfuncCreateFontIndirectW)(LOGFONTW *lplf);
 int WINAPI NewCreateFontIndirectW(LOGFONTW *lplf)
 {
-	lplf->lfCharSet = ANSI_CHARSET;
+	//lplf->lfCharSet = ANSI_CHARSET;
+	lplf->lfCharSet = GB2312_CHARSET;
 	//lplf->lfCharSet = GB2312_CHARSET;
 
 	//修改后的字体，包括音符等特殊符号
-	wcscpy(lplf->lfFaceName, L"黑体");
+	//wcscpy(lplf->lfFaceName, L"黑体");
 
 	return ((PfuncCreateFontIndirectW)g_pOldCreateFontIndirectW)(lplf);
 }
@@ -72,8 +74,8 @@ typedef int (WINAPI *PfuncMultiByteToWideChar)(UINT CodePage,DWORD dwFlags,LPCST
 int WINAPI NewMultiByteToWideChar(UINT CodePage, DWORD dwFlags, LPCSTR lpMultiByteStr, int cbMultiByte, LPWSTR lpWideCharStr, int cchWideChar
 	)
 {
-	//if (CodePage == 932)
-		//CodePage = 936;
+	if (CodePage == 932)
+		CodePage = 936;
 	return ((PfuncMultiByteToWideChar)g_pOldMultiByteToWideChar)(CodePage, dwFlags, lpMultiByteStr, cbMultiByte, lpWideCharStr, cchWideChar);
 }
 
@@ -184,7 +186,7 @@ __declspec(naked) void __stdcall ft_textout_black()
 ///////////////替换字符串/////////////////////////////////////////////////
 #ifdef ACR_TRANSLATE
 
-#if 0 //夏之雨
+#if 0 //EntisGLS 夏之雨
 wstring fix_note(wstring oldstr) //修正句子中注释结构
 {
 	//regex是在运行时“编译”的，因此构造效率较低，使用static避免重复构造
@@ -197,12 +199,25 @@ wstring fix_note(wstring oldstr) //修正句子中注释结构
 	return newstr;
 }
 
-//00480256 | .  53            push    ebx
-//00480257 | .  8BCF          mov     ecx, edi
-//00480259 | .  897C24 14     mov     dword ptr[esp + 0x14], edi
-//0048025D      FF52 10       call    dword ptr[edx + 0x10];  get_glyph. dword ptr[edx + 0x10] = 004B21F0
+//004B21F0  /$  55            push    ebp
+//004B21F1  |.  8BEC          mov     ebp, esp
+//004B21F3  |.  6A FF         push    -0x1
+//004B21F5  |.  68 6D345000   push    0050346D                         ;  SE 处理程序安装
+//004B21FA  |.  64:A1 0000000>mov     eax, dword ptr fs:[0]
+//004B2200  |.  50            push    eax
+//004B2201  |.  64:8925 00000>mov     dword ptr fs:[0], esp
+//004B2208  |.  81EC 84010000 sub     esp, 0x184
+//004B220E  |.  53            push    ebx
+//004B220F  |.  56            push    esi
+//004B2210  |.  57            push    edi
+//004B2211  |.  8B7D 08       mov     edi, [arg.1]
+//004B2214  |.  33DB          xor     ebx, ebx
+//004B2216  |.  8BF1          mov     esi, ecx
+//004B2218  |.  3BFB          cmp     edi, ebx
+//004B221A  |.  89B5 44FFFFFF mov     [local.47], esi
 
-//004B21F0   $  55            push    ebp
+//查找 sub     esp, 0x184
+
 
 typedef ulong (__stdcall *get_glyph_func_fn)(wchar_t *wstr);
 get_glyph_func_fn get_glyph_func = (get_glyph_func_fn)0x4B21F0;
@@ -284,8 +299,9 @@ __declspec(naked) void __stdcall get_text()
 	}
 
 }
-#endif
+#endif //EntisGLS 夏之雨
 
+#if 0 //Solfa 祝樱
 //00494D20 / $  55            push    ebp;  ebx = string_offset
 void* g_p_get_offset = (void*)0x494D20;
 ulong real_offset; //字符串在文件中实际地址
@@ -359,7 +375,155 @@ End:
 	}
 
 }
+#endif //Solfa 祝樱
 
+#if 1//krkrz サノバウィッチ
+
+bool is_alpha_string(wchar_t *wstr, uint len)
+{
+	if (!wstr)
+		return false;
+
+	for (uint i = 0; i < len; i++)
+	{
+		if (wstr[i] >= 0x100)
+			return false;
+	}
+	return true;
+}
+
+bool is_control_string(wstring wstr)
+{
+	if (wstr.find(L"_") != wstr.npos
+		|| wstr.find(L"ラベル") != wstr.npos
+		|| wstr.find(L".") != wstr.npos)
+		return true;
+	
+	return false;
+}
+
+//0041D1F0 > / .  55            push    ebp;  TVPUtf8ToWideCharString
+//0041D1F1 | .    8BEC          mov     ebp, esp
+//0041D1F3 | .    8B55 0C       mov     edx, [arg.2]
+//0041D1F6 | .    8B4D 08       mov     ecx, [arg.1]
+//0041D1F9 | .    E8 824FFEFF   call    00402180
+//0041D1FE | .    5D            pop     ebp
+//0041D1FF  \.    C2 0800       retn    0x8
+
+
+typedef int (__stdcall *fnTVPUtf8ToWideCharString)(const char * & in, wchar_t *out);
+fnTVPUtf8ToWideCharString TVPUtf8ToWideCharString = (fnTVPUtf8ToWideCharString)0x0041D1F0;
+
+HMODULE g_hdll;
+
+typedef unordered_map<uint, int> UintMap;
+UintMap check_map;
+
+int __stdcall newTVPUtf8ToWideCharString(const char * & in, wchar_t *out)
+{
+	//__asm pushad //保护现场！
+
+	static int caller_addr = 0;
+	__asm
+	{
+		mov eax, [esp+0x54]; //主调函数返回地址，0x5C由OD调试得到
+		mov caller_addr, eax;
+	}
+
+	int len = TVPUtf8ToWideCharString(in, out);
+
+	if ((caller_addr & 0xFFFF0000) != (uint)g_hdll) //如果主调函数不在psbfile.dll中则返回
+		return len;
+	if (!in || !out || len == 0)
+		return len;
+	if (is_alpha_string(out, len))
+		return len;
+
+	static wstring pre_wstr;
+	wstring wstr(out, len);
+
+	if (is_control_string(wstr))
+		return len;
+	
+	//logfile->AddLog(wstr);
+	if (wstr != pre_wstr)
+	{
+		uint hash = BKDRHash((uchar*)wstr.c_str(), wstr.size() * 2);
+		bool is_in_dic = check_map.find(hash) == check_map.end() ? false : true;
+		if (wstr[0] == L'「' && pre_wstr[0] != L'「' && !is_in_dic) //说明上一句是人名
+			logfile->AddLog(pre_wstr); //写名字
+
+		if (!is_in_dic)
+		{
+			logfile->AddLog(wstr);
+			check_map.insert(UintMap::value_type(hash, 0));
+		}
+		
+	}
+	pre_wstr = wstr;
+	
+	//__asm popad //恢复现场
+	return len;
+
+	/*
+	if (wstr != NULL)
+	{
+		ulong oldlen = wstrlen(wstr);
+
+		wstring fixed_oldstr = deleteenter(fix_note(wstr)); //去掉回车
+		ulong fixed_oldlen = fixed_oldstr.size() * 2;
+
+		memstr newstr = injector.MatchString((void*)fixed_oldstr.c_str(), fixed_oldlen); //进行匹配
+
+		wstring fixed_newstr = addenter(wstring((wchar_t*)newstr.str, newstr.strlen / 2), 24); //添加回车
+
+
+		if (newstr.str != NULL) //如果匹配,复制新字符串
+		{
+			ulong newlen = fixed_newstr.size() * 2;
+			memcpy(viewstr, fixed_newstr.c_str(), newlen);
+			memset(&viewstr[newlen], 0, 2);
+		}
+		else //如果不匹配，复制原来的字符串，并log出未匹配的句子
+		{
+			memcpy(viewstr, wstr, oldlen);
+			memset(&viewstr[oldlen], 0, 2);
+
+			logfile.AddLog(wstr);
+		}
+
+	}
+	else
+	{
+		memset(viewstr, 0, CACHE_LEN); //清空内存，否则会出现大量重复显示
+	}
+	*/
+	
+}
+
+
+typedef HMODULE(WINAPI *fnLoadLibraryW)(LPCWSTR lpLibFileName);
+fnLoadLibraryW pLoadLibraryW = LoadLibraryW;
+HMODULE WINAPI newLoadLibraryW(LPCWSTR lpLibFileName)
+{
+	static bool isRecord = false;
+
+	if (lpLibFileName)
+	{
+		wstring dllname = lpLibFileName;
+		if (dllname.find(L"psbfile.dll") != dllname.npos && !isRecord)
+		{
+			isRecord = true;
+			g_hdll = pLoadLibraryW(lpLibFileName);
+			return g_hdll;
+		}
+	}
+
+	return pLoadLibraryW(lpLibFileName);
+}
+
+
+#endif //krkrz サノバウィッチ
 
 
 #endif
@@ -390,21 +554,21 @@ void SetHook()
 	DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&g_pOldCreateFontIndirectW, NewCreateFontIndirectW);
 	DetourTransactionCommit();
-	
+	/*
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&g_pOldMultiByteToWideChar, NewMultiByteToWideChar);
+	DetourAttach(&g_pOldMultiByteToWideChar, NewMultiByteToWideChar);*/
 	DetourTransactionCommit();
 #endif
 
 
 #ifdef ACR_TRANSLATE
 	DetourTransactionBegin();
-	DetourAttach((void**)&g_p_modify_offset, modify_offset);
+	DetourAttach((void**)&TVPUtf8ToWideCharString, newTVPUtf8ToWideCharString);
 	DetourTransactionCommit();
 
 	DetourTransactionBegin();
-	DetourAttach((void**)&g_p_get_offset, get_offset);
+	DetourAttach((void**)&pLoadLibraryW, newLoadLibraryW);
 	DetourTransactionCommit();
 #endif
 
@@ -442,10 +606,10 @@ void InitProc()
 #ifdef ACR_TRANSLATE
 
 	//parser = new AcrParser("shukufuku.acr");
-	parser = new TextParser("Shukufuku.txt");
-	translator = new Translator(*parser);
-	engine.Init(*translator);
-	//logfile.Init("stringlog.txt", OPEN_ALWAYS);
+	//parser = new TextParser("Shukufuku.txt");
+	//translator = new Translator(*parser);
+	//engine.Init(*translator);
+	logfile = new LogFile("stringlog.txt", OPEN_ALWAYS);
 
 #endif
 	SetHook();
@@ -453,8 +617,11 @@ void InitProc()
 
 void UnInst()
 {
-	delete parser;
-	delete translator;
+#ifdef ACR_TRANSLATE
+	//delete parser;
+	//delete translator;
+	delete logfile;
+#endif
 }
 
 //需要一个导出函数

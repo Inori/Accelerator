@@ -1,7 +1,7 @@
 #include <Windows.h>
 #include <new>
 
-#include "zlib.h"
+//#include "zlib.h"
 #include "scriptparser.h"
 #include "tools.h"
 
@@ -78,8 +78,10 @@ acr_index *AcrParser::Parse()
 
 	byte *comp_data = data + sizeof(acr_header);
 
-	if (is_compressed)
+	//if (is_compressed)
+	if (0)
 	{
+		/*
 		real_size = header->orgsize;
 		ulong comp_size = header->compsize;
 		real_data = new byte[real_size];
@@ -89,6 +91,7 @@ acr_index *AcrParser::Parse()
 			return NULL;
 		}
 		delete[] data;
+		*/
 	}
 	else
 	{
@@ -173,11 +176,10 @@ acr_index* TextParser::Parse()
 	//重写此处以适应不同格式文本
 	while (fwscanf(fin, L"○%08X○%08d●\r\n%s\r\n\r\n", &offset, &num, text) == 3)
 	{
-		str = UnicodeToAnsi(text, 936);
-		int len = strlen(str);
+		int len = wstrlen(text);
 
-		memcpy(real_data + pos, str, len);
-		memset(real_data + pos + len, 0x1B, 1); //其他游戏需要根据情况适当修改
+		memcpy(real_data + pos, text, len);
+		memset(real_data + pos + len, 0, 2); //其他游戏需要根据情况适当修改
 
 		cur.hash = offset;
 		cur.new_str_len = len;
@@ -186,7 +188,7 @@ acr_index* TextParser::Parse()
 		cur.old_str_off = (ulong)real_data + pos; //这两个暂时先这样
 
 		index.push_back(cur);
-		pos += (len+1);
+		pos += (len+2);
 	}
 
 	return (acr_index*)&index[0];
