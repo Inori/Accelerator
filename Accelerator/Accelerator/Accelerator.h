@@ -8,7 +8,7 @@
 #ifndef ACCELERATOR_H
 #define ACCELERATOR_H
 
-#include <Windows.h>
+#include <windows.h>
 #include <regex>
 
 #include "detours.h"

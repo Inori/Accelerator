@@ -53,18 +53,12 @@
     <Library Include="zlib.lib">
       <Filter>资源文件</Filter>
     </Library>
-    <Library Include="ftsdk\lib\freetype.lib">
-      <Filter>资源文件</Filter>
-    </Library>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Accelerator.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="tools.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="drawtext.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="scriptparser.cpp">

@@ -1,23 +1,25 @@
-#include "Accelerator.h"
+ï»¿#include "Accelerator.h"
 #include "stdio.h"
 
-///////////////////¹¦ÄÜÉèÖÃ£ºÓÃÀ´¶¨Òå±¾´Î±àÒëĞèÒªÍê³ÉµÄ¹¦ÄÜ///////////////////////
+///////////////////åŠŸèƒ½è®¾ç½®ï¼šç”¨æ¥å®šä¹‰æœ¬æ¬¡ç¼–è¯‘éœ€è¦å®Œæˆçš„åŠŸèƒ½///////////////////////
 
-//ÖĞÎÄ×Ö·û¼¯
+//ä¸­æ–‡å­—ç¬¦é›†
 #define ACR_GBKFONT
 
-//»æÖÆ×ÖÌå
+//ç»˜åˆ¶å­—ä½“
 //#define ACR_DRAWTEXT
 
-//¶¯Ì¬ºº»¯
-#define ACR_TRANSLATE
+//åŠ¨æ€æ±‰åŒ–
+//#define ACR_TRANSLATE
 
 
-//°üÀ¨ÒÔÏÂÔÚÄÚµÄÆäËû¹¦ÄÜ£º
-//1¡¢ĞŞ¸Ä´°¿Ú±êÌâ
-//#define ACR_EXTRA
+//åŒ…æ‹¬ä»¥ä¸‹åœ¨å†…çš„å…¶ä»–åŠŸèƒ½ï¼š
+//1ã€ä¿®æ”¹çª—å£æ ‡é¢˜
+//2ã€ä¿®æ­£å°åŒ…æ–‡ä»¶å
+#define ACR_EXTRA
 
-////////////È«¾Ö±äÁ¿////////////////////////////////////////////////////////
+
+////////////å…¨å±€å˜é‡////////////////////////////////////////////////////////
 
 #ifdef ACR_DRAWTEXT
 
@@ -37,19 +39,19 @@ LogFile *logfile;
 
 
 
-////////////ÖĞÎÄ×Ö·û¼¯////////////////////////////////////////////////////////
+////////////ä¸­æ–‡å­—ç¬¦é›†////////////////////////////////////////////////////////
 #ifdef ACR_GBKFONT
 
 PVOID g_pOldCreateFontIndirectA = CreateFontIndirectA;
 typedef int (WINAPI *PfuncCreateFontIndirectA)(LOGFONTA *lplf);
 int WINAPI NewCreateFontIndirectA(LOGFONTA *lplf)
 {
-	//lplf->lfCharSet = ANSI_CHARSET;
-	lplf->lfCharSet = GB2312_CHARSET;
+	lplf->lfCharSet = ANSI_CHARSET;
+	//lplf->lfCharSet = SHIFTJIS_CHARSET;
 	//lplf->lfCharSet = GB2312_CHARSET;
 
-	//ĞŞ¸ÄºóµÄ×ÖÌå£¬°üÀ¨Òô·ûµÈÌØÊâ·ûºÅ
-	//strcpy(lplf->lfFaceName, "ºÚÌå");
+	//ä¿®æ”¹åçš„å­—ä½“ï¼ŒåŒ…æ‹¬éŸ³ç¬¦ç­‰ç‰¹æ®Šç¬¦å·
+	//strcpy(lplf->lfFaceName, "é»‘ä½“");
 
 	return ((PfuncCreateFontIndirectA)g_pOldCreateFontIndirectA)(lplf);
 }
@@ -58,14 +60,61 @@ PVOID g_pOldCreateFontIndirectW = CreateFontIndirectW;
 typedef int (WINAPI *PfuncCreateFontIndirectW)(LOGFONTW *lplf);
 int WINAPI NewCreateFontIndirectW(LOGFONTW *lplf)
 {
-	//lplf->lfCharSet = ANSI_CHARSET;
-	lplf->lfCharSet = GB2312_CHARSET;
+	lplf->lfCharSet = ANSI_CHARSET;
+	//lplf->lfCharSet = SHIFTJIS_CHARSET;
 	//lplf->lfCharSet = GB2312_CHARSET;
 
-	//ĞŞ¸ÄºóµÄ×ÖÌå£¬°üÀ¨Òô·ûµÈÌØÊâ·ûºÅ
-	//wcscpy(lplf->lfFaceName, L"ºÚÌå");
+	//ä¿®æ”¹åçš„å­—ä½“ï¼ŒåŒ…æ‹¬éŸ³ç¬¦ç­‰ç‰¹æ®Šç¬¦å·
+	//wcscpy(lplf->lfFaceName, L"é»‘ä½“");
 
 	return ((PfuncCreateFontIndirectW)g_pOldCreateFontIndirectW)(lplf);
+}
+
+PVOID g_pOldCreateFontA = CreateFontA;
+typedef int (WINAPI *PfuncCreateFontA)(int nHeight,
+	int nWidth,
+	int nEscapement,
+	int nOrientation,
+	int fnWeight,
+	DWORD fdwltalic,
+	DWORD fdwUnderline,
+	DWORD fdwStrikeOut,
+	DWORD fdwCharSet,
+	DWORD fdwOutputPrecision,
+	DWORD fdwClipPrecision,
+	DWORD fdwQuality,
+	DWORD fdwPitchAndFamily,
+	LPCTSTR lpszFace);
+int WINAPI NewCreateFontA(int nHeight,
+	int nWidth,
+	int nEscapement,
+	int nOrientation,
+	int fnWeight,
+	DWORD fdwltalic,
+	DWORD fdwUnderline,
+	DWORD fdwStrikeOut,
+	DWORD fdwCharSet,
+	DWORD fdwOutputPrecision,
+	DWORD fdwClipPrecision,
+	DWORD fdwQuality,
+	DWORD fdwPitchAndFamily,
+	LPCTSTR lpszFace)
+{
+	fdwCharSet = ANSI_CHARSET;
+	return ((PfuncCreateFontA)g_pOldCreateFontA)(nHeight,
+		nWidth,
+		nEscapement,
+		nOrientation,
+		fnWeight,
+		fdwltalic,
+		fdwUnderline,
+		fdwStrikeOut,
+		fdwCharSet,
+		fdwOutputPrecision,
+		fdwClipPrecision,
+		fdwQuality,
+		fdwPitchAndFamily,
+		lpszFace);
 }
 
 
@@ -79,73 +128,213 @@ int WINAPI NewMultiByteToWideChar(UINT CodePage, DWORD dwFlags, LPCSTR lpMultiBy
 	return ((PfuncMultiByteToWideChar)g_pOldMultiByteToWideChar)(CodePage, dwFlags, lpMultiByteStr, cbMultiByte, lpWideCharStr, cchWideChar);
 }
 
+
+PVOID g_pOldWideCharToMultiByte = WideCharToMultiByte;
+typedef int(WINAPI *PfuncWideCharToMultiByte)(
+	UINT CodePage,
+	DWORD dwFlags, 
+	LPCWSTR lpWideCharStr, 
+	int cchWideChar, 
+	LPSTR lpMultiByteStr,
+	int cchMultiByte,
+	LPCSTR lpDefaultChar, 
+	LPBOOL pfUsedDefaultChar
+);
+int WINAPI NewWideCharToMultiByte(
+	UINT CodePage,
+	DWORD dwFlags,
+	LPCWSTR lpWideCharStr,
+	int cchWideChar,
+	LPSTR lpMultiByteStr,
+	int cchMultiByte,
+	LPCSTR lpDefaultChar,
+	LPBOOL pfUsedDefaultChar
+)
+{
+	CodePage = 932;
+	return ((PfuncWideCharToMultiByte)g_pOldWideCharToMultiByte)(CodePage, dwFlags, lpWideCharStr, cchWideChar, lpMultiByteStr, cchMultiByte, lpDefaultChar, pfUsedDefaultChar);
+}
+
 #endif
 
-///////////////ĞŞ¸ÄÉÙÁ¿ÏµÍ³ÎÄ×Ö///////////////////////////////////////////////////
+///////////////ä¿®æ”¹å°‘é‡ç³»ç»Ÿæ–‡å­—///////////////////////////////////////////////////
 #ifdef ACR_EXTRA
-PVOID g_pOldSetWindowTextA = NULL;
-typedef int (WINAPI *PfuncSetWindowTextA)(HWND hwnd, LPCTSTR lpString);
-int WINAPI NewSetWindowTextA(HWND hwnd, LPCTSTR lpString)
+
+LPCSTR g_szGameWinTitleA = "Steam Prison â€”â€” â˜…ä¹™å¥³æµ®ä¸–ç»˜â˜…";
+LPCWSTR g_szGameWinTitleW = L"Steam Prison â€”â€” â˜…ä¹™å¥³æµ®ä¸–ç»˜â˜…";
+
+PVOID g_pOldSetWindowTextA = SetWindowTextA;
+typedef int (WINAPI *PfuncSetWindowTextA)(HWND hwnd, LPCSTR lpString);
+int WINAPI NewSetWindowTextA(HWND hwnd, LPCSTR lpString)
 {
-	if (!memcmp(lpString, "‰Äƒm‰J", 6))
-	{
-		strcpy((char*)(LPCTSTR)lpString, "¼ÜÏòĞÇ¿ÕÖ®ÇÅAA");
-	}
-	return ((PfuncSetWindowTextA)g_pOldSetWindowTextA)(hwnd, lpString);
+	//int nRet = SetWindowTextW(hwnd, g_szGameWinTitleW);
+	int nRet = ((PfuncSetWindowTextA)g_pOldSetWindowTextA)(hwnd, g_szGameWinTitleA);
+	return nRet;//((PfuncSetWindowTextA)g_pOldSetWindowTextA)(hwnd, lpString);
 }
 
 PVOID g_pOldCreateWindowExA = CreateWindowExA;
 typedef HWND (WINAPI *PfuncCreateWindowExA)(
-	DWORD dwExStyle,//´°¿ÚµÄÀ©Õ¹·ç¸ñ
-	LPCTSTR lpClassName,//Ö¸Ïò×¢²áÀàÃûµÄÖ¸Õë
-	LPCTSTR lpWindowName,//Ö¸Ïò´°¿ÚÃû³ÆµÄÖ¸Õë
-	DWORD dwStyle,//´°¿Ú·ç¸ñ
-	int x,//´°¿ÚµÄË®Æ½Î»ÖÃ
-	int y,//´°¿ÚµÄ´¹Ö±Î»ÖÃ
-	int nWidth,//´°¿ÚµÄ¿í¶È
-	int nHeight,//´°¿ÚµÄ¸ß¶È
-	HWND hWndParent,//¸¸´°¿ÚµÄ¾ä±ú
-	HMENU hMenu,//²Ëµ¥µÄ¾ä±ú»òÊÇ×Ó´°¿ÚµÄ±êÊ¶·û
-	HINSTANCE hInstance,//Ó¦ÓÃ³ÌĞòÊµÀıµÄ¾ä±ú
-	LPVOID lpParam//Ö¸Ïò´°¿ÚµÄ´´½¨Êı¾İ
+	DWORD dwExStyle,//çª—å£çš„æ‰©å±•é£æ ¼
+	LPCSTR lpClassName,//æŒ‡å‘æ³¨å†Œç±»åçš„æŒ‡é’ˆ
+	LPCSTR lpWindowName,//æŒ‡å‘çª—å£åç§°çš„æŒ‡é’ˆ
+	DWORD dwStyle,//çª—å£é£æ ¼
+	int x,//çª—å£çš„æ°´å¹³ä½ç½®
+	int y,//çª—å£çš„å‚ç›´ä½ç½®
+	int nWidth,//çª—å£çš„å®½åº¦
+	int nHeight,//çª—å£çš„é«˜åº¦
+	HWND hWndParent,//çˆ¶çª—å£çš„å¥æŸ„
+	HMENU hMenu,//èœå•çš„å¥æŸ„æˆ–æ˜¯å­çª—å£çš„æ ‡è¯†ç¬¦
+	HINSTANCE hInstance,//åº”ç”¨ç¨‹åºå®ä¾‹çš„å¥æŸ„
+	LPVOID lpParam//æŒ‡å‘çª—å£çš„åˆ›å»ºæ•°æ®
 	);
 
 HWND WINAPI NewCreateWindowExA(
-	DWORD dwExStyle,//´°¿ÚµÄÀ©Õ¹·ç¸ñ
-	LPCTSTR lpClassName,//Ö¸Ïò×¢²áÀàÃûµÄÖ¸Õë
-	LPCTSTR lpWindowName,//Ö¸Ïò´°¿ÚÃû³ÆµÄÖ¸Õë
-	DWORD dwStyle,//´°¿Ú·ç¸ñ
-	int x,//´°¿ÚµÄË®Æ½Î»ÖÃ
-	int y,//´°¿ÚµÄ´¹Ö±Î»ÖÃ
-	int nWidth,//´°¿ÚµÄ¿í¶È
-	int nHeight,//´°¿ÚµÄ¸ß¶È
-	HWND hWndParent,//¸¸´°¿ÚµÄ¾ä±ú
-	HMENU hMenu,//²Ëµ¥µÄ¾ä±ú»òÊÇ×Ó´°¿ÚµÄ±êÊ¶·û
-	HINSTANCE hInstance,//Ó¦ÓÃ³ÌĞòÊµÀıµÄ¾ä±ú
-	LPVOID lpParam//Ö¸Ïò´°¿ÚµÄ´´½¨Êı¾İ
+	DWORD dwExStyle,//çª—å£çš„æ‰©å±•é£æ ¼
+	LPCSTR lpClassName,//æŒ‡å‘æ³¨å†Œç±»åçš„æŒ‡é’ˆ
+	LPCSTR lpWindowName,//æŒ‡å‘çª—å£åç§°çš„æŒ‡é’ˆ
+	DWORD dwStyle,//çª—å£é£æ ¼
+	int x,//çª—å£çš„æ°´å¹³ä½ç½®
+	int y,//çª—å£çš„å‚ç›´ä½ç½®
+	int nWidth,//çª—å£çš„å®½åº¦
+	int nHeight,//çª—å£çš„é«˜åº¦
+	HWND hWndParent,//çˆ¶çª—å£çš„å¥æŸ„
+	HMENU hMenu,//èœå•çš„å¥æŸ„æˆ–æ˜¯å­çª—å£çš„æ ‡è¯†ç¬¦
+	HINSTANCE hInstance,//åº”ç”¨ç¨‹åºå®ä¾‹çš„å¥æŸ„
+	LPVOID lpParam//æŒ‡å‘çª—å£çš„åˆ›å»ºæ•°æ®
 	)
 {
-	const char* titlename = "ÏÄÖ®Óê";
+	const char* titlename = g_szGameWinTitleA;
 
 	return ((PfuncCreateWindowExA)g_pOldCreateWindowExA)(
-		dwExStyle,//´°¿ÚµÄÀ©Õ¹·ç¸ñ
-		lpClassName,//Ö¸Ïò×¢²áÀàÃûµÄÖ¸Õë
-		titlename,//Ö¸Ïò´°¿ÚÃû³ÆµÄÖ¸Õë
-		dwStyle,//´°¿Ú·ç¸ñ
-		x,//´°¿ÚµÄË®Æ½Î»ÖÃ
-		y,//´°¿ÚµÄ´¹Ö±Î»ÖÃ
-		nWidth,//´°¿ÚµÄ¿í¶È
-		nHeight,//´°¿ÚµÄ¸ß¶È
-		hWndParent,//¸¸´°¿ÚµÄ¾ä±ú
-		hMenu,//²Ëµ¥µÄ¾ä±ú»òÊÇ×Ó´°¿ÚµÄ±êÊ¶·û
-		hInstance,//Ó¦ÓÃ³ÌĞòÊµÀıµÄ¾ä±ú
-		lpParam//Ö¸Ïò´°¿ÚµÄ´´½¨Êı¾İ
+		dwExStyle,//çª—å£çš„æ‰©å±•é£æ ¼
+		lpClassName,//æŒ‡å‘æ³¨å†Œç±»åçš„æŒ‡é’ˆ
+		titlename,//æŒ‡å‘çª—å£åç§°çš„æŒ‡é’ˆ
+		dwStyle,//çª—å£é£æ ¼
+		x,//çª—å£çš„æ°´å¹³ä½ç½®
+		y,//çª—å£çš„å‚ç›´ä½ç½®
+		nWidth,//çª—å£çš„å®½åº¦
+		nHeight,//çª—å£çš„é«˜åº¦
+		hWndParent,//çˆ¶çª—å£çš„å¥æŸ„
+		hMenu,//èœå•çš„å¥æŸ„æˆ–æ˜¯å­çª—å£çš„æ ‡è¯†ç¬¦
+		hInstance,//åº”ç”¨ç¨‹åºå®ä¾‹çš„å¥æŸ„
+		lpParam//æŒ‡å‘çª—å£çš„åˆ›å»ºæ•°æ®
 		);
 }
+
+PVOID g_pOldSetWindowTextW = SetWindowTextW;
+typedef int (WINAPI *PfuncSetWindowTextW)(HWND hwnd, LPCWSTR lpString);
+int WINAPI NewSetWindowTextW(HWND hwnd, LPCWSTR lpString)
+{
+	if (!memcmp(lpString, "å£åƒ²å¡‰", 6))
+	{
+		strcpy((char*)(LPCWSTR)lpString, "æ¶å‘æ˜Ÿç©ºä¹‹æ¡¥AA");
+	}
+	return ((PfuncSetWindowTextW)g_pOldSetWindowTextW)(hwnd, lpString);
+}
+
+PVOID g_pOldCreateWindowExW = CreateWindowExW;
+typedef HWND(WINAPI *PfuncCreateWindowExW)(
+	DWORD dwExStyle,//çª—å£çš„æ‰©å±•é£æ ¼
+	LPCWSTR lpClassName,//æŒ‡å‘æ³¨å†Œç±»åçš„æŒ‡é’ˆ
+	LPCWSTR lpWindowName,//æŒ‡å‘çª—å£åç§°çš„æŒ‡é’ˆ
+	DWORD dwStyle,//çª—å£é£æ ¼
+	int x,//çª—å£çš„æ°´å¹³ä½ç½®
+	int y,//çª—å£çš„å‚ç›´ä½ç½®
+	int nWidth,//çª—å£çš„å®½åº¦
+	int nHeight,//çª—å£çš„é«˜åº¦
+	HWND hWndParent,//çˆ¶çª—å£çš„å¥æŸ„
+	HMENU hMenu,//èœå•çš„å¥æŸ„æˆ–æ˜¯å­çª—å£çš„æ ‡è¯†ç¬¦
+	HINSTANCE hInstance,//åº”ç”¨ç¨‹åºå®ä¾‹çš„å¥æŸ„
+	LPVOID lpParam//æŒ‡å‘çª—å£çš„åˆ›å»ºæ•°æ®
+	);
+
+HWND WINAPI NewCreateWindowExW(
+	DWORD dwExStyle,//çª—å£çš„æ‰©å±•é£æ ¼
+	LPCWSTR lpClassName,//æŒ‡å‘æ³¨å†Œç±»åçš„æŒ‡é’ˆ
+	LPCWSTR lpWindowName,//æŒ‡å‘çª—å£åç§°çš„æŒ‡é’ˆ
+	DWORD dwStyle,//çª—å£é£æ ¼
+	int x,//çª—å£çš„æ°´å¹³ä½ç½®
+	int y,//çª—å£çš„å‚ç›´ä½ç½®
+	int nWidth,//çª—å£çš„å®½åº¦
+	int nHeight,//çª—å£çš„é«˜åº¦
+	HWND hWndParent,//çˆ¶çª—å£çš„å¥æŸ„
+	HMENU hMenu,//èœå•çš„å¥æŸ„æˆ–æ˜¯å­çª—å£çš„æ ‡è¯†ç¬¦
+	HINSTANCE hInstance,//åº”ç”¨ç¨‹åºå®ä¾‹çš„å¥æŸ„
+	LPVOID lpParam//æŒ‡å‘çª—å£çš„åˆ›å»ºæ•°æ®
+)
+{
+	const WCHAR* titlename = g_szGameWinTitleW;
+
+	return ((PfuncCreateWindowExW)g_pOldCreateWindowExW)(
+		dwExStyle,//çª—å£çš„æ‰©å±•é£æ ¼
+		lpClassName,//æŒ‡å‘æ³¨å†Œç±»åçš„æŒ‡é’ˆ
+		titlename,//æŒ‡å‘çª—å£åç§°çš„æŒ‡é’ˆ
+		dwStyle,//çª—å£é£æ ¼
+		x,//çª—å£çš„æ°´å¹³ä½ç½®
+		y,//çª—å£çš„å‚ç›´ä½ç½®
+		nWidth,//çª—å£çš„å®½åº¦
+		nHeight,//çª—å£çš„é«˜åº¦
+		hWndParent,//çˆ¶çª—å£çš„å¥æŸ„
+		hMenu,//èœå•çš„å¥æŸ„æˆ–æ˜¯å­çª—å£çš„æ ‡è¯†ç¬¦
+		hInstance,//åº”ç”¨ç¨‹åºå®ä¾‹çš„å¥æŸ„
+		lpParam//æŒ‡å‘çª—å£çš„åˆ›å»ºæ•°æ®
+		);
+}
+
+PVOID g_pOldCreateFileA = CreateFileA;
+typedef HANDLE (WINAPI *PfuncCreateFileA)(
+	LPCSTR lpFileName,
+	DWORD dwDesiredAccess,
+	DWORD dwShareMode,
+	LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+	DWORD dwCreationDisposition,
+	DWORD dwFlagsAndAttributes,
+	HANDLE hTemplateFile
+	);
+
+
+HANDLE WINAPI NewCreateFileA(
+	LPCSTR lpFileName,
+	DWORD dwDesiredAccess,
+	DWORD dwShareMode,
+	LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+	DWORD dwCreationDisposition,
+	DWORD dwFlagsAndAttributes,
+	HANDLE hTemplateFile)
+{
+	if (!lpFileName)
+	{
+		return INVALID_HANDLE_VALUE;
+	}
+
+	string strOldName(lpFileName);
+	string strDirName = strOldName.substr(0, strOldName.find_last_of("\\") + 1);
+	string strName = strOldName.substr(strOldName.find_last_of("\\") + 1);
+	string strNewName;
+
+	if (strName == "scene.int")
+	{
+		//MessageBoxA(NULL, "Found", "Asuka", MB_OK);
+		strNewName = strDirName + "cnscene.int";
+	}
+	else
+	{
+		strNewName = strOldName;
+	}
+	return ((PfuncCreateFileA)(g_pOldCreateFileA))(
+		strNewName.c_str(),
+		dwDesiredAccess,
+		dwShareMode,
+		lpSecurityAttributes,
+		dwCreationDisposition,
+		dwFlagsAndAttributes,
+		hTemplateFile);
+}
+
 #endif
 
 
-///////////////»æÖÆÎÄ×Ö///////////////////////////////////////////////////////////
+///////////////ç»˜åˆ¶æ–‡å­—///////////////////////////////////////////////////////////
 
 
 #ifdef ACR_DRAWTEXT
@@ -183,13 +372,13 @@ __declspec(naked) void __stdcall ft_textout_black()
 
 #endif
 
-///////////////Ìæ»»×Ö·û´®/////////////////////////////////////////////////
+///////////////æ›¿æ¢å­—ç¬¦ä¸²/////////////////////////////////////////////////
 #ifdef ACR_TRANSLATE
 
-#if 0 //EntisGLS ÏÄÖ®Óê
-wstring fix_note(wstring oldstr) //ĞŞÕı¾ä×ÓÖĞ×¢ÊÍ½á¹¹
+#if 0 //EntisGLS å¤ä¹‹é›¨
+wstring fix_note(wstring oldstr) //ä¿®æ­£å¥å­ä¸­æ³¨é‡Šç»“æ„
 {
-	//regexÊÇÔÚÔËĞĞÊ±¡°±àÒë¡±µÄ£¬Òò´Ë¹¹ÔìĞ§ÂÊ½ÏµÍ£¬Ê¹ÓÃstatic±ÜÃâÖØ¸´¹¹Ôì
+	//regexæ˜¯åœ¨è¿è¡Œæ—¶â€œç¼–è¯‘â€çš„ï¼Œå› æ­¤æ„é€ æ•ˆç‡è¾ƒä½ï¼Œä½¿ç”¨staticé¿å…é‡å¤æ„é€ 
 	static wstring partten = L"//;(.+?);(.+?):";
 	static wregex reg(partten);
 	static wstring fmt = L"$1";
@@ -202,7 +391,7 @@ wstring fix_note(wstring oldstr) //ĞŞÕı¾ä×ÓÖĞ×¢ÊÍ½á¹¹
 //004B21F0  /$  55            push    ebp
 //004B21F1  |.  8BEC          mov     ebp, esp
 //004B21F3  |.  6A FF         push    -0x1
-//004B21F5  |.  68 6D345000   push    0050346D                         ;  SE ´¦Àí³ÌĞò°²×°
+//004B21F5  |.  68 6D345000   push    0050346D                         ;  SE å¤„ç†ç¨‹åºå®‰è£…
 //004B21FA  |.  64:A1 0000000>mov     eax, dword ptr fs:[0]
 //004B2200  |.  50            push    eax
 //004B2201  |.  64:8925 00000>mov     dword ptr fs:[0], esp
@@ -216,7 +405,7 @@ wstring fix_note(wstring oldstr) //ĞŞÕı¾ä×ÓÖĞ×¢ÊÍ½á¹¹
 //004B2218  |.  3BFB          cmp     edi, ebx
 //004B221A  |.  89B5 44FFFFFF mov     [local.47], esi
 
-//²éÕÒ sub     esp, 0x184
+//æŸ¥æ‰¾ sub     esp, 0x184
 
 
 typedef ulong (__stdcall *get_glyph_func_fn)(wchar_t *wstr);
@@ -227,27 +416,27 @@ uchar viewstr[CACHE_LEN];
 
 void __stdcall modify_text(wchar_t *wstr)
 {
-	__asm pushad //±£»¤ÏÖ³¡£¬·Ç³£ÖØÒª£¡
+	__asm pushad //ä¿æŠ¤ç°åœºï¼Œéå¸¸é‡è¦ï¼
 	
 	if (wstr != NULL)
 	{
 		ulong oldlen = wstrlen(wstr);
 
-		wstring fixed_oldstr = deleteenter(fix_note(wstr)); //È¥µô»Ø³µ
+		wstring fixed_oldstr = deleteenter(fix_note(wstr)); //å»æ‰å›è½¦
 		ulong fixed_oldlen = fixed_oldstr.size() * 2;
 
-		memstr newstr = injector.MatchString((void*)fixed_oldstr.c_str(), fixed_oldlen); //½øĞĞÆ¥Åä
+		memstr newstr = injector.MatchString((void*)fixed_oldstr.c_str(), fixed_oldlen); //è¿›è¡ŒåŒ¹é…
 
-		wstring fixed_newstr = addenter(wstring((wchar_t*)newstr.str, newstr.strlen/2), 24); //Ìí¼Ó»Ø³µ
+		wstring fixed_newstr = addenter(wstring((wchar_t*)newstr.str, newstr.strlen/2), 24); //æ·»åŠ å›è½¦
 		
 		
-		if (newstr.str != NULL) //Èç¹ûÆ¥Åä,¸´ÖÆĞÂ×Ö·û´®
+		if (newstr.str != NULL) //å¦‚æœåŒ¹é…,å¤åˆ¶æ–°å­—ç¬¦ä¸²
 		{
 			ulong newlen = fixed_newstr.size() * 2;
 			memcpy(viewstr, fixed_newstr.c_str(), newlen);
 			memset(&viewstr[newlen], 0, 2);
 		}
-		else //Èç¹û²»Æ¥Åä£¬¸´ÖÆÔ­À´µÄ×Ö·û´®£¬²¢log³öÎ´Æ¥ÅäµÄ¾ä×Ó
+		else //å¦‚æœä¸åŒ¹é…ï¼Œå¤åˆ¶åŸæ¥çš„å­—ç¬¦ä¸²ï¼Œå¹¶logå‡ºæœªåŒ¹é…çš„å¥å­
 		{
 			memcpy(viewstr, wstr, oldlen);
 			memset(&viewstr[oldlen], 0, 2);
@@ -258,10 +447,10 @@ void __stdcall modify_text(wchar_t *wstr)
 	}
 	else
 	{
-		memset(viewstr, 0, CACHE_LEN); //Çå¿ÕÄÚ´æ£¬·ñÔò»á³öÏÖ´óÁ¿ÖØ¸´ÏÔÊ¾
+		memset(viewstr, 0, CACHE_LEN); //æ¸…ç©ºå†…å­˜ï¼Œå¦åˆ™ä¼šå‡ºç°å¤§é‡é‡å¤æ˜¾ç¤º
 	}
 	
-	__asm popad //»Ö¸´ÏÖ³¡
+	__asm popad //æ¢å¤ç°åœº
 	get_glyph_func((wchar_t*)viewstr);
 }
 
@@ -299,12 +488,12 @@ __declspec(naked) void __stdcall get_text()
 	}
 
 }
-#endif //EntisGLS ÏÄÖ®Óê
+#endif //EntisGLS å¤ä¹‹é›¨
 
-#if 0 //Solfa ×£Ó£
+#if 0 //Solfa ç¥æ¨±
 //00494D20 / $  55            push    ebp;  ebx = string_offset
 void* g_p_get_offset = (void*)0x494D20;
-ulong real_offset; //×Ö·û´®ÔÚÎÄ¼şÖĞÊµ¼ÊµØÖ·
+ulong real_offset; //å­—ç¬¦ä¸²åœ¨æ–‡ä»¶ä¸­å®é™…åœ°å€
 __declspec(naked) void __stdcall get_offset()
 {
 	__asm
@@ -325,27 +514,27 @@ ulong __stdcall get_text()
 {
 	if (real_offset != 0)
 	{
-		memstr newstr = engine.MatchStringByOffset(real_offset); //½øĞĞÆ¥Åä
+		memstr newstr = engine.MatchStringByOffset(real_offset); //è¿›è¡ŒåŒ¹é…
 
-		if (newstr.str != NULL) //Èç¹ûÆ¥Åä,¸´ÖÆĞÂ×Ö·û´®
+		if (newstr.str != NULL) //å¦‚æœåŒ¹é…,å¤åˆ¶æ–°å­—ç¬¦ä¸²
 		{
 			ulong newlen = newstr.strlen;
 			memcpy(viewstr, newstr.str, newlen);
 			memset(&viewstr[newlen], 0x1B, 1);
 			memset(&viewstr[newlen+1], 0x00, 1);
 
-			return (ulong)(viewstr + newlen); //0x1BµÄµØÖ·
+			return (ulong)(viewstr + newlen); //0x1Bçš„åœ°å€
 		}
-		else //Èç¹û²»Æ¥Åä£¬¸´ÖÆÔ­À´µÄ×Ö·û´®£¬²¢log³öÎ´Æ¥ÅäµÄ¾ä×Ó
+		else //å¦‚æœä¸åŒ¹é…ï¼Œå¤åˆ¶åŸæ¥çš„å­—ç¬¦ä¸²ï¼Œå¹¶logå‡ºæœªåŒ¹é…çš„å¥å­
 		{
-			memset(viewstr, 0, CACHE_LEN); //Çå¿ÕÄÚ´æ
+			memset(viewstr, 0, CACHE_LEN); //æ¸…ç©ºå†…å­˜
 			//logfile.AddLog(wstr);
 		}
 
 	}
 	else
 	{
-		memset(viewstr, 0, CACHE_LEN); //Çå¿ÕÄÚ´æ£¬·ñÔò»á³öÏÖ´óÁ¿ÖØ¸´ÏÔÊ¾
+		memset(viewstr, 0, CACHE_LEN); //æ¸…ç©ºå†…å­˜ï¼Œå¦åˆ™ä¼šå‡ºç°å¤§é‡é‡å¤æ˜¾ç¤º
 	}
 
 	return 0;
@@ -375,9 +564,9 @@ End:
 	}
 
 }
-#endif //Solfa ×£Ó£
+#endif //Solfa ç¥æ¨±
 
-#if 1//krkrz ¥µ¥Î¥Ğ¥¦¥£¥Ã¥Á
+#if 1//krkrz ã‚µãƒãƒã‚¦ã‚£ãƒƒãƒ
 
 bool is_alpha_string(wchar_t *wstr, uint len)
 {
@@ -395,7 +584,7 @@ bool is_alpha_string(wchar_t *wstr, uint len)
 bool is_control_string(wstring wstr)
 {
 	if (wstr.find(L"_") != wstr.npos
-		|| wstr.find(L"¥é¥Ù¥ë") != wstr.npos
+		|| wstr.find(L"ãƒ©ãƒ™ãƒ«") != wstr.npos
 		|| wstr.find(L".") != wstr.npos)
 		return true;
 	
@@ -421,18 +610,18 @@ UintMap check_map;
 
 int __stdcall newTVPUtf8ToWideCharString(const char * & in, wchar_t *out)
 {
-	//__asm pushad //±£»¤ÏÖ³¡£¡
+	//__asm pushad //ä¿æŠ¤ç°åœºï¼
 
 	static int caller_addr = 0;
 	__asm
 	{
-		mov eax, [esp+0x54]; //Ö÷µ÷º¯Êı·µ»ØµØÖ·£¬0x5CÓÉODµ÷ÊÔµÃµ½
+		mov eax, [esp+0x54]; //ä¸»è°ƒå‡½æ•°è¿”å›åœ°å€ï¼Œ0x5Cç”±ODè°ƒè¯•å¾—åˆ°
 		mov caller_addr, eax;
 	}
 
 	int len = TVPUtf8ToWideCharString(in, out);
 
-	if ((caller_addr & 0xFFFF0000) != (uint)g_hdll) //Èç¹ûÖ÷µ÷º¯Êı²»ÔÚpsbfile.dllÖĞÔò·µ»Ø
+	if ((caller_addr & 0xFFFF0000) != (uint)g_hdll) //å¦‚æœä¸»è°ƒå‡½æ•°ä¸åœ¨psbfile.dllä¸­åˆ™è¿”å›
 		return len;
 	if (!in || !out || len == 0)
 		return len;
@@ -450,8 +639,8 @@ int __stdcall newTVPUtf8ToWideCharString(const char * & in, wchar_t *out)
 	{
 		uint hash = BKDRHash((uchar*)wstr.c_str(), wstr.size() * 2);
 		bool is_in_dic = check_map.find(hash) == check_map.end() ? false : true;
-		if (wstr[0] == L'¡¸' && pre_wstr[0] != L'¡¸' && !is_in_dic) //ËµÃ÷ÉÏÒ»¾äÊÇÈËÃû
-			logfile->AddLog(pre_wstr); //Ğ´Ãû×Ö
+		if (wstr[0] == L'ã€Œ' && pre_wstr[0] != L'ã€Œ' && !is_in_dic) //è¯´æ˜ä¸Šä¸€å¥æ˜¯äººå
+			logfile->AddLog(pre_wstr); //å†™åå­—
 
 		if (!is_in_dic)
 		{
@@ -462,7 +651,7 @@ int __stdcall newTVPUtf8ToWideCharString(const char * & in, wchar_t *out)
 	}
 	pre_wstr = wstr;
 	
-	//__asm popad //»Ö¸´ÏÖ³¡
+	//__asm popad //æ¢å¤ç°åœº
 	return len;
 
 	/*
@@ -470,21 +659,21 @@ int __stdcall newTVPUtf8ToWideCharString(const char * & in, wchar_t *out)
 	{
 		ulong oldlen = wstrlen(wstr);
 
-		wstring fixed_oldstr = deleteenter(fix_note(wstr)); //È¥µô»Ø³µ
+		wstring fixed_oldstr = deleteenter(fix_note(wstr)); //å»æ‰å›è½¦
 		ulong fixed_oldlen = fixed_oldstr.size() * 2;
 
-		memstr newstr = injector.MatchString((void*)fixed_oldstr.c_str(), fixed_oldlen); //½øĞĞÆ¥Åä
+		memstr newstr = injector.MatchString((void*)fixed_oldstr.c_str(), fixed_oldlen); //è¿›è¡ŒåŒ¹é…
 
-		wstring fixed_newstr = addenter(wstring((wchar_t*)newstr.str, newstr.strlen / 2), 24); //Ìí¼Ó»Ø³µ
+		wstring fixed_newstr = addenter(wstring((wchar_t*)newstr.str, newstr.strlen / 2), 24); //æ·»åŠ å›è½¦
 
 
-		if (newstr.str != NULL) //Èç¹ûÆ¥Åä,¸´ÖÆĞÂ×Ö·û´®
+		if (newstr.str != NULL) //å¦‚æœåŒ¹é…,å¤åˆ¶æ–°å­—ç¬¦ä¸²
 		{
 			ulong newlen = fixed_newstr.size() * 2;
 			memcpy(viewstr, fixed_newstr.c_str(), newlen);
 			memset(&viewstr[newlen], 0, 2);
 		}
-		else //Èç¹û²»Æ¥Åä£¬¸´ÖÆÔ­À´µÄ×Ö·û´®£¬²¢log³öÎ´Æ¥ÅäµÄ¾ä×Ó
+		else //å¦‚æœä¸åŒ¹é…ï¼Œå¤åˆ¶åŸæ¥çš„å­—ç¬¦ä¸²ï¼Œå¹¶logå‡ºæœªåŒ¹é…çš„å¥å­
 		{
 			memcpy(viewstr, wstr, oldlen);
 			memset(&viewstr[oldlen], 0, 2);
@@ -495,7 +684,7 @@ int __stdcall newTVPUtf8ToWideCharString(const char * & in, wchar_t *out)
 	}
 	else
 	{
-		memset(viewstr, 0, CACHE_LEN); //Çå¿ÕÄÚ´æ£¬·ñÔò»á³öÏÖ´óÁ¿ÖØ¸´ÏÔÊ¾
+		memset(viewstr, 0, CACHE_LEN); //æ¸…ç©ºå†…å­˜ï¼Œå¦åˆ™ä¼šå‡ºç°å¤§é‡é‡å¤æ˜¾ç¤º
 	}
 	*/
 	
@@ -523,14 +712,14 @@ HMODULE WINAPI newLoadLibraryW(LPCWSTR lpLibFileName)
 }
 
 
-#endif //krkrz ¥µ¥Î¥Ğ¥¦¥£¥Ã¥Á
+#endif //krkrz ã‚µãƒãƒã‚¦ã‚£ãƒƒãƒ
 
 
 #endif
 
 
 //////////////////////////////////////////////////////////////////////////
-//°²×°Hook 
+//å®‰è£…Hook 
 void SetHook()
 {
 #ifdef ACR_DRAWTEXT
@@ -548,16 +737,10 @@ void SetHook()
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&g_pOldCreateFontIndirectA, NewCreateFontIndirectA);
-	DetourTransactionCommit();
-
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&g_pOldCreateFontIndirectW, NewCreateFontIndirectW);
-	DetourTransactionCommit();
-	/*
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&g_pOldMultiByteToWideChar, NewMultiByteToWideChar);*/
+	DetourAttach(&g_pOldCreateFontA, NewCreateFontA);
+	//DetourAttach(&g_pOldMultiByteToWideChar, NewMultiByteToWideChar);
+	//DetourAttach(&g_pOldWideCharToMultiByte, NewWideCharToMultiByte);
 	DetourTransactionCommit();
 #endif
 
@@ -577,13 +760,13 @@ void SetHook()
 	
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
-	g_pOldSetWindowTextA = DetourFindFunction("USER32.dll", "SetWindowTextA");
-	DetourAttach(&g_pOldSetWindowTextA, NewSetWindowTextA);
-	DetourTransactionCommit();
+	
+	//DetourAttach(&g_pOldSetWindowTextA, NewSetWindowTextA);
+	//DetourAttach(&g_pOldCreateWindowExA, NewCreateWindowExA);
+	//DetourAttach(&g_pOldCreateWindowExW, NewCreateWindowExW);
 
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&g_pOldCreateWindowExA, NewCreateWindowExA);
+	DetourAttach(&g_pOldCreateFileA, NewCreateFileA);
+
 	DetourTransactionCommit();
 	
 #endif
@@ -624,7 +807,7 @@ void UnInst()
 #endif
 }
 
-//ĞèÒªÒ»¸öµ¼³öº¯Êı
+//éœ€è¦ä¸€ä¸ªå¯¼å‡ºå‡½æ•°
 __declspec(dllexport)void WINAPI Dummy()
 {
 }

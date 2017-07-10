@@ -155,14 +155,14 @@ bool GdipDrawer::InitDrawer(string fontname, int font_size)
 
 void GdipDrawer::SetTextColor(TextColor color)
 {
-	text_colorMatrix =
-	{ 
-		(float)color.b / 255.0,	0.0f,					0.0f,					0.0f,					0.0f,
-		0.0f,					(float)color.g / 255.0,	0.0f,					0.0f,					0.0f,
-		0.0f,					0.0f,					(float)color.r / 255.0, 0.0f,					0.0f,
-		0.0f,					0.0f,					0.0f,					(float)color.a / 255.0, 0.0f,
-		0.0f,					0.0f,					0.0f,					0.0f,					1.0f 
-	};
+	//text_colorMatrix =
+	//{ 
+	//	(float)color.b / 255.0,	0.0f,					0.0f,					0.0f,					0.0f,
+	//	0.0f,					(float)color.g / 255.0,	0.0f,					0.0f,					0.0f,
+	//	0.0f,					0.0f,					(float)color.r / 255.0, 0.0f,					0.0f,
+	//	0.0f,					0.0f,					0.0f,					(float)color.a / 255.0, 0.0f,
+	//	0.0f,					0.0f,					0.0f,					0.0f,					1.0f 
+	//};
 
 	has_color = true;
 }
@@ -171,14 +171,14 @@ void GdipDrawer::SetTextColor(TextColor color)
 void GdipDrawer::ApplyEffect(TextEffect effect, TextColor color, float _d_pixwidth, float _radius)
 {
 	//Ìî³äÐ§¹ûÑÕÉ«¾ØÕó
-	effect_colorMatrix =
-	{
-		(float)color.b / 255.0, 0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, (float)color.g / 255.0, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, (float)color.r / 255.0, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, (float)color.a / 255.0, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f, 1.0f
-	};
+	//effect_colorMatrix =
+	//{
+	//	(float)color.b / 255.0, 0.0f, 0.0f, 0.0f, 0.0f,
+	//	0.0f, (float)color.g / 255.0, 0.0f, 0.0f, 0.0f,
+	//	0.0f, 0.0f, (float)color.r / 255.0, 0.0f, 0.0f,
+	//	0.0f, 0.0f, 0.0f, (float)color.a / 255.0, 0.0f,
+	//	0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+	//};
 
 	d_pixwidth = _d_pixwidth;
 	radius = _radius;
