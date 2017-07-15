@@ -716,6 +716,28 @@ HMODULE WINAPI newLoadLibraryW(LPCWSTR lpLibFileName)
 
 #if 1 //Cat2System
 
+
+
+#define IMAGE_CRC_INIT (0L)
+
+void __stdcall ProcessImage(byte* pBuffer, uint nWidth, uint nHeight)
+{
+	uint nImageSize = nWidth * nHeight * 4;
+
+	pic_data pic = { 0 };
+	pic.flag = HAVE_ALPHA;
+	pic.bit_depth = 8;
+	pic.width = nWidth;
+	pic.height = nHeight;
+	pic.rgba = pBuffer;
+
+	uint nCrc = crc32(IMAGE_CRC_INIT, pBuffer, nImageSize);
+	char szImageName[MAX_PATH] = { 0 };
+	sprintf(szImageName, "%08X.png", nCrc);
+	std::string strName(szImageName);
+	write_png_file(strName, &pic);
+}
+
 //
 //00548ECF | .  3942 04 | cmp     dword ptr[edx + 0x4], eax
 //00548ED2 | .  7E 37 | jle     short 00548F0B
@@ -744,58 +766,27 @@ HMODULE WINAPI newLoadLibraryW(LPCWSTR lpLibFileName)
 //00548F13 | .  40 | inc     eax
 //
 
-
-void* g_p_record_image_info = (void*)0x00548ED4;
-uint g_nWidth = 0;
-uint g_nHeight = 0;
-byte* g_pImageBuffer = NULL;
-void __declspec(naked) record_image_info()
-{
-	__asm
-	{
-		mov eax, dword ptr[esp + 0x5C]
-		shr eax, 2
-		mov g_nWidth, eax
-		mov eax, dword ptr[esp + 0x24]
-		mov	eax, dword ptr[eax + 0x4]
-		mov g_nHeight, eax
-		mov g_pImageBuffer, ecx
-		jmp g_p_record_image_info
-	}
-}
-
-#define IMAGE_CRC_INIT (0L)
-
-void __stdcall WriteImage()
-{
-	uint nImageSize = g_nWidth * g_nHeight * 4;
-
-	pic_data pic = { 0 };
-	pic.flag = HAVE_ALPHA;
-	pic.bit_depth = 8;
-	pic.width = g_nWidth;
-	pic.height = g_nHeight;
-	pic.rgba = g_pImageBuffer;
-
-	uint nCrc = crc32(IMAGE_CRC_INIT, g_pImageBuffer, nImageSize);
-	char szImageName[MAX_PATH] = { 0 };
-	sprintf(szImageName, "%08X.png", nCrc);
-	std::string strName(szImageName);
-	write_png_file(strName, &pic);
-}
-
-
-void* g_p_write_image = (void*)0x00548F0B;
-void __declspec(naked) write_image()
+void* g_p_copy_image = (void*)0x00548F0B;
+void __declspec(naked) copy_image()
 {
 	__asm
 	{
 		pushad
 		pushfd
-		call WriteImage
+
+		mov eax, dword ptr[esp + 0x48]
+		mov	ebx, dword ptr[eax + 0x4]  //ebx = height
+		mov edx, dword ptr[esp + 0x80]
+		add ecx, edx  //ecx = buffer
+		shr edx, 2  //edx = width
+		push ebx
+		push edx
+		push ecx
+		call ProcessImage
+
 		popfd
 		popad
-		jmp g_p_write_image
+		jmp g_p_copy_image
 	}
 }
 
@@ -835,8 +826,7 @@ void SetHook()
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 
-	DetourAttach(&g_p_record_image_info, record_image_info);
-	DetourAttach(&g_p_write_image, write_image);
+	DetourAttach(&g_p_copy_image, copy_image);
 
 	DetourTransactionCommit();
 #endif
