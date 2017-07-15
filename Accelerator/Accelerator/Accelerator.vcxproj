@@ -91,6 +91,7 @@
     <ClInclude Include="detours.h" />
     <ClInclude Include="detver.h" />
     <ClInclude Include="drawtext.h" />
+    <ClInclude Include="pngfile.h" />
     <ClInclude Include="scriptparser.h" />
     <ClInclude Include="translate.h" />
     <ClInclude Include="tools.h" />
@@ -100,10 +101,12 @@
   </ItemGroup>
   <ItemGroup>
     <Library Include="detours.lib" />
+    <Library Include="libpng16.lib" />
     <Library Include="zlib.lib" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Accelerator.cpp" />
+    <ClCompile Include="pngfile.cpp" />
     <ClCompile Include="scriptparser.cpp" />
     <ClCompile Include="translate.cpp" />
     <ClCompile Include="tools.cpp" />

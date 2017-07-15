@@ -17,5 +17,7 @@
 #include "translate.h"
 #include "scriptparser.h"
 
+#include "pngfile.h"
+
 
 #endif

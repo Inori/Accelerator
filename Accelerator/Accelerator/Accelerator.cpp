@@ -10,7 +10,7 @@
 //#define ACR_DRAWTEXT
 
 //动态汉化
-//#define ACR_TRANSLATE
+#define ACR_TRANSLATE
 
 
 //包括以下在内的其他功能：
@@ -566,7 +566,7 @@ End:
 }
 #endif //Solfa 祝樱
 
-#if 1//krkrz サノバウィッチ
+#if 0//krkrz サノバウィッチ
 
 bool is_alpha_string(wchar_t *wstr, uint len)
 {
@@ -714,9 +714,95 @@ HMODULE WINAPI newLoadLibraryW(LPCWSTR lpLibFileName)
 
 #endif //krkrz サノバウィッチ
 
+#if 1 //Cat2System
+
+//
+//00548ECF | .  3942 04 | cmp     dword ptr[edx + 0x4], eax
+//00548ED2 | .  7E 37 | jle     short 00548F0B
+//00548ED4 | > 8B5424 5C | / mov     edx, dword ptr[esp + 0x5C];  edx = stride
+//00548ED8 | .  85D2 || test    edx, edx
+//00548EDA | .  74 1D || je      short 00548EF9
+//00548EDC | .  8D6424 00 || lea     esp, dword ptr[esp]
+//00548EE0 | > 0FB603 || / movzx   eax, byte ptr[ebx]
+//00548EE3 | .  8D49 01 || | lea     ecx, dword ptr[ecx + 0x1]
+//00548EE6 | .  43 || | inc     ebx
+//00548EE7 | .  8A4430 78 || | mov     al, byte ptr[eax + esi + 0x78]
+//00548EEB | .  02440F FF || | add     al, byte ptr[edi + ecx - 0x1]
+//00548EEF | .  8841 FF || | mov     byte ptr[ecx - 0x1], al
+//00548EF2 | .  4A || | dec     edx
+//00548EF3 | . ^ 75 EB || \jnz     short 00548EE0
+//00548EF5 | .  8B4424 18 || mov     eax, dword ptr[esp + 0x18]
+//00548EF9 | > 8B5424 24 || mov     edx, dword ptr[esp + 0x24]
+//00548EFD | .  40 || inc     eax
+//00548EFE | .  2BEF || sub     ebp, edi
+//00548F00 | .  894424 18 || mov     dword ptr[esp + 0x18], eax
+//00548F04 | .  8BCD || mov     ecx, ebp
+//00548F06 | .  3B42 04 || cmp     eax, dword ptr[edx + 0x4]
+//00548F09 | . ^ 7C C9 | \jl      short 00548ED4
+//00548F0B | > 8B4424 54 | mov     eax, dword ptr[esp + 0x54]
+//00548F0F | .  8B5C24 60 | mov     ebx, dword ptr[esp + 0x60]
+//00548F13 | .  40 | inc     eax
+//
+
+
+void* g_p_record_image_info = (void*)0x00548ED4;
+uint g_nWidth = 0;
+uint g_nHeight = 0;
+byte* g_pImageBuffer = NULL;
+void __declspec(naked) record_image_info()
+{
+	__asm
+	{
+		mov eax, dword ptr[esp + 0x5C]
+		shr eax, 2
+		mov g_nWidth, eax
+		mov eax, dword ptr[esp + 0x24]
+		mov	eax, dword ptr[eax + 0x4]
+		mov g_nHeight, eax
+		mov g_pImageBuffer, ecx
+		jmp g_p_record_image_info
+	}
+}
+
+#define IMAGE_CRC_INIT (0L)
+
+void __stdcall WriteImage()
+{
+	uint nImageSize = g_nWidth * g_nHeight * 4;
+
+	pic_data pic = { 0 };
+	pic.flag = HAVE_ALPHA;
+	pic.bit_depth = 8;
+	pic.width = g_nWidth;
+	pic.height = g_nHeight;
+	pic.rgba = g_pImageBuffer;
+
+	uint nCrc = crc32(IMAGE_CRC_INIT, g_pImageBuffer, nImageSize);
+	char szImageName[MAX_PATH] = { 0 };
+	sprintf(szImageName, "%08X.png", nCrc);
+	std::string strName(szImageName);
+	write_png_file(strName, &pic);
+}
+
+
+void* g_p_write_image = (void*)0x00548F0B;
+void __declspec(naked) write_image()
+{
+	__asm
+	{
+		pushad
+		pushfd
+		call WriteImage
+		popfd
+		popad
+		jmp g_p_write_image
+	}
+}
+
+
+#endif //Cat2System
 
 #endif
-
 
 //////////////////////////////////////////////////////////////////////////
 //安装Hook 
@@ -747,11 +833,11 @@ void SetHook()
 
 #ifdef ACR_TRANSLATE
 	DetourTransactionBegin();
-	DetourAttach((void**)&TVPUtf8ToWideCharString, newTVPUtf8ToWideCharString);
-	DetourTransactionCommit();
+	DetourUpdateThread(GetCurrentThread());
 
-	DetourTransactionBegin();
-	DetourAttach((void**)&pLoadLibraryW, newLoadLibraryW);
+	DetourAttach(&g_p_record_image_info, record_image_info);
+	DetourAttach(&g_p_write_image, write_image);
+
 	DetourTransactionCommit();
 #endif
 

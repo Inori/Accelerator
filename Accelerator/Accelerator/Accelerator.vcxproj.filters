@@ -45,12 +45,18 @@
     <ClInclude Include="translate.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="pngfile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="detours.lib">
       <Filter>资源文件</Filter>
     </Library>
     <Library Include="zlib.lib">
+      <Filter>资源文件</Filter>
+    </Library>
+    <Library Include="libpng16.lib">
       <Filter>资源文件</Filter>
     </Library>
   </ItemGroup>
@@ -65,6 +71,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="translate.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="pngfile.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
