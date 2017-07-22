@@ -48,6 +48,9 @@
     <ClInclude Include="pngfile.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="replacemap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="detours.lib">
@@ -74,6 +77,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="pngfile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="replacemap.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -9,22 +9,36 @@
 using namespace std;
 
 #define PNG_BYTES_TO_CHECK 4
-#define HAVE_ALPHA 1
-#define NO_ALPHA 0
 
-
-typedef struct _pic_data
+enum AlphaFlag
 {
-	unsigned int width, height; /* 尺寸 */
-	int bit_depth;  /* 位深 */
-	int flag;   /* 一个标志，表示是否有alpha通道 */
+	HAVE_ALPHA = 0,
+	NO_ALPHA
+};
 
-	unsigned char *rgba; /* 图片数组 */
-} pic_data;
+typedef struct _PNG_DATA
+{
+	unsigned int nWidth;
+	unsigned int nHeight;
+	AlphaFlag eFlag;
+	unsigned char *pRgba;
+} PNG_DATA;
 
-int read_png_file(string filepath, pic_data *out);
+class PngFile
+{
+public:
 
-int write_png_file(string file_name, pic_data *graph);
+	static bool ReadPngFile(const char* pszFileName, PNG_DATA* pPngData);
 
+	static bool ReadPngFile(FILE* pFile, PNG_DATA* pPngData);
+
+	static bool WritePngFile(const char* pszFileName, PNG_DATA* pPngData);
+
+	static bool WritePngFile(FILE* pFile, PNG_DATA* pPngData);
+
+private:
+	static bool ReadRGBA(png_bytepp pRow, int nWidth, int nHeight, PNG_DATA* pPngData);
+	static bool ReadRGB(png_bytepp pRow, int nWidth, int nHeight, PNG_DATA* pPngData);
+};
 
 #endif

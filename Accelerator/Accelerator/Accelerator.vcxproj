@@ -41,7 +41,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(WindowsSDK_IncludePath);$(ProjectDir)ftsdk\include;$(ProjectDir)dxsdk\include</IncludePath>
+    <IncludePath>$(WindowsSDK_IncludePath);$(ProjectDir)ftsdk\include;$(ProjectDir)dxsdk\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -56,6 +56,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ACCELERATOR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalOptions>/D "_CRT_SECURE_NO_WARNINGS" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -92,6 +93,7 @@
     <ClInclude Include="detver.h" />
     <ClInclude Include="drawtext.h" />
     <ClInclude Include="pngfile.h" />
+    <ClInclude Include="replacemap.h" />
     <ClInclude Include="scriptparser.h" />
     <ClInclude Include="translate.h" />
     <ClInclude Include="tools.h" />
@@ -107,6 +109,7 @@
   <ItemGroup>
     <ClCompile Include="Accelerator.cpp" />
     <ClCompile Include="pngfile.cpp" />
+    <ClCompile Include="replacemap.cpp" />
     <ClCompile Include="scriptparser.cpp" />
     <ClCompile Include="translate.cpp" />
     <ClCompile Include="tools.cpp" />

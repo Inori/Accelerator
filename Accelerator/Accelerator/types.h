@@ -13,4 +13,8 @@ typedef unsigned int uint;
 typedef unsigned long ulong;
 typedef unsigned long long ulonglong;
 
+#ifndef MAX_PATH
+#define MAX_PATH 260
+#endif
+
 #endif

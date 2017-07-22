@@ -32,7 +32,7 @@ ScriptParser *parser;
 Translator *translator;
 TranslateEngine *engine;
 LogFile *logfile;
-
+ReplaceMap g_oImageMap;
 #endif
 
 
@@ -51,7 +51,7 @@ int WINAPI NewCreateFontIndirectA(LOGFONTA *lplf)
 	//lplf->lfCharSet = GB2312_CHARSET;
 
 	//修改后的字体，包括音符等特殊符号
-	//strcpy(lplf->lfFaceName, "黑体");
+	strcpy(lplf->lfFaceName, "楷体");
 
 	return ((PfuncCreateFontIndirectA)g_pOldCreateFontIndirectA)(lplf);
 }
@@ -65,7 +65,7 @@ int WINAPI NewCreateFontIndirectW(LOGFONTW *lplf)
 	//lplf->lfCharSet = GB2312_CHARSET;
 
 	//修改后的字体，包括音符等特殊符号
-	//wcscpy(lplf->lfFaceName, L"黑体");
+	wcscpy(lplf->lfFaceName, L"楷体");
 
 	return ((PfuncCreateFontIndirectW)g_pOldCreateFontIndirectW)(lplf);
 }
@@ -101,6 +101,7 @@ int WINAPI NewCreateFontA(int nHeight,
 	LPCTSTR lpszFace)
 {
 	fdwCharSet = ANSI_CHARSET;
+	LPCTSTR lpFontName = "楷体";
 	return ((PfuncCreateFontA)g_pOldCreateFontA)(nHeight,
 		nWidth,
 		nEscapement,
@@ -114,9 +115,56 @@ int WINAPI NewCreateFontA(int nHeight,
 		fdwClipPrecision,
 		fdwQuality,
 		fdwPitchAndFamily,
-		lpszFace);
+		lpFontName);
 }
 
+PVOID g_pOldGetGlyphOutlineW = GetGlyphOutlineW;
+typedef DWORD (WINAPI *PfuncGetGlyphOutlineW)(
+	HDC            hdc,
+	UINT           uChar,
+	UINT           uFormat,
+	LPGLYPHMETRICS lpgm,
+	DWORD          cbBuffer,
+	LPVOID         lpvBuffer,
+	const MAT2     *lpmat2
+);
+
+DWORD WINAPI NewGetGlyphOutlineW(
+	HDC			   hdc,
+	UINT           uChar,
+	UINT           uFormat,
+	LPGLYPHMETRICS lpgm,
+	DWORD          cbBuffer,
+	LPVOID         lpvBuffer,
+	const MAT2     *lpmat2)
+{
+
+	HFONT hOldFont = NULL;
+	if (uChar == 0xEEA1)  //a1ee=☆
+	{
+		uChar = 0x8140;
+
+		LOGFONTW lpFont = { 0 };
+		lpFont.lfWidth = 0xFFFFFFEC;
+		lpFont.lfCharSet = SHIFTJIS_CHARSET;
+		lpFont.lfQuality = ANTIALIASED_QUALITY;
+		//wcscpy(lpFont.lfFaceName, L"MS ゴシック");
+		HFONT hFont = CreateFontIndirectW(&lpFont);
+		if (hFont && hdc)
+		{
+			hOldFont = (HFONT)SelectObject(hdc, hFont);
+		}
+	}
+
+	DWORD dwRet = ((PfuncGetGlyphOutlineW)g_pOldGetGlyphOutlineW)(hdc, uChar, uFormat, lpgm, cbBuffer, lpvBuffer, lpmat2);
+
+	if (hOldFont && hdc)
+	{
+		SelectObject(hdc, hOldFont);
+	}
+
+	return dwRet;
+}
 
 PVOID g_pOldMultiByteToWideChar = MultiByteToWideChar;
 typedef int (WINAPI *PfuncMultiByteToWideChar)(UINT CodePage,DWORD dwFlags,LPCSTR lpMultiByteStr,int cbMultiByte,LPWSTR lpWideCharStr,int cchWideChar);
@@ -316,6 +364,10 @@ HANDLE WINAPI NewCreateFileA(
 	{
 		//MessageBoxA(NULL, "Found", "Asuka", MB_OK);
 		strNewName = strDirName + "cnscene.int";
+	}
+	else if (strName == "fes.int")
+	{
+		strNewName = strDirName + "cnfes.int";
 	}
 	else
 	{
@@ -716,26 +768,104 @@ HMODULE WINAPI newLoadLibraryW(LPCWSTR lpLibFileName)
 
 #if 1 //Cat2System
 
+bool ReadPngFile(const std::string& strName, int nOffset, PNG_DATA* pPngData)
+{
+	if (!pPngData || strName.empty())
+	{
+		return false;
+	}
 
+	FILE* fPng = fopen(strName.c_str(), "rb");
+	if (!fPng)
+	{
+		return false;
+	}
+
+	if (nOffset)
+	{
+		fseek(fPng, nOffset, SEEK_SET);
+	}
+
+	if (!PngFile::ReadPngFile(fPng, pPngData))
+	{
+		fclose(fPng);
+		if (pPngData->pRgba)
+		{
+			free(pPngData->pRgba);
+		}
+
+		MessageBoxA(NULL, strName.c_str(), "PNG Error", MB_OK);
+		return false;
+	}
+
+	fclose(fPng);
+	return true;
+}
 
 #define IMAGE_CRC_INIT (0L)
+#define CN_IMAGE_PKG_NAME "cnimage.int"
+void ReplaceImage(byte* pBuffer, uint nWidth, uint nHeight)
+{
+	if (!pBuffer)
+	{
+		return;
+	}
 
-void __stdcall ProcessImage(byte* pBuffer, uint nWidth, uint nHeight)
+	uint nImageSize = nWidth * nHeight * 4;
+	uint nCrc = crc32(IMAGE_CRC_INIT, pBuffer, nImageSize);
+	char szImageName[MAX_PATH] = { 0 };
+	sprintf(szImageName, "%08X.png", nCrc);
+	std::string strName(szImageName);
+
+	PNG_DATA oPngData = { 0 };
+
+	std::string strSingleFile = "cnimage\\";
+	strSingleFile += strName;
+	if (ReadPngFile(strSingleFile, 0, &oPngData))
+	{
+		memcpy(pBuffer, oPngData.pRgba, nImageSize);
+		free(oPngData.pRgba);
+		return;
+	}
+
+	info_t oImageInfo = { 0 };
+	if (!g_oImageMap.GetInfo(strName, &oImageInfo))
+	{
+		return;
+	}
+
+	uint nOffset = oImageInfo.offset;
+	if (ReadPngFile(CN_IMAGE_PKG_NAME, nOffset, &oPngData))
+	{
+		memcpy(pBuffer, oPngData.pRgba, nImageSize);
+		free(oPngData.pRgba);
+		return;
+	}
+}
+
+void WriteImage(byte* pBuffer, uint nWidth, uint nHeight)
 {
 	uint nImageSize = nWidth * nHeight * 4;
 
-	pic_data pic = { 0 };
-	pic.flag = HAVE_ALPHA;
-	pic.bit_depth = 8;
-	pic.width = nWidth;
-	pic.height = nHeight;
-	pic.rgba = pBuffer;
+	PNG_DATA pic = { 0 };
+	pic.eFlag = HAVE_ALPHA;
+	pic.nWidth = nWidth;
+	pic.nHeight = nHeight;
+	pic.pRgba = pBuffer;
 
 	uint nCrc = crc32(IMAGE_CRC_INIT, pBuffer, nImageSize);
 	char szImageName[MAX_PATH] = { 0 };
 	sprintf(szImageName, "%08X.png", nCrc);
 	std::string strName(szImageName);
-	write_png_file(strName, &pic);
+	PngFile::WritePngFile(strName.c_str(), &pic);
+}
+
+
+
+void __stdcall ProcessImage(byte* pBuffer, uint nWidth, uint nHeight)
+{
+	ReplaceImage(pBuffer, nWidth, nHeight);
+	//WriteImage(pBuffer, nWidth, nHeight);
 }
 
 //
@@ -868,8 +998,9 @@ void InitProc()
 	//parser = new TextParser("Shukufuku.txt");
 	//translator = new Translator(*parser);
 	//engine.Init(*translator);
-	logfile = new LogFile("stringlog.txt", OPEN_ALWAYS);
+	//logfile = new LogFile("stringlog.txt", OPEN_ALWAYS);
 
+	g_oImageMap.FillMap(CN_IMAGE_PKG_NAME);
 #endif
 	SetHook();
 }

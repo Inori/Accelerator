@@ -18,6 +18,6 @@
 #include "scriptparser.h"
 
 #include "pngfile.h"
-
+#include "replacemap.h"
 
 #endif
